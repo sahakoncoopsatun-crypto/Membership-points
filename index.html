@@ -176,7 +176,7 @@
               สืบค้นตำแหน่งแฟ้มเอกสารสมาชิก
             </h2>
             <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
-              ค้นหาครอบคลุม: <strong class="text-blue-600 font-semibold">เลขที่สมาชิก</strong>, <strong class="text-amber-600 font-semibold">ชื่อ - สกุล</strong>, <strong class="text-indigo-600 font-semibold">ที่อยู่</strong>, <strong class="text-slate-700 font-semibold">สังกัด</strong>, <strong class="text-sky-600 font-semibold">ตู้เลขที่</strong>, และ <strong class="text-emerald-600 font-semibold">ชั้นที่</strong>
+              ค้นหาครอบคลุม: <strong class="text-blue-600 font-semibold">เลขที่สมาชิก</strong>, <strong class="text-amber-600 font-semibold">ชื่อ - สกุล</strong>, <strong class="text-slate-700 font-semibold">สังกัด</strong>, <strong class="text-purple-600 font-semibold">ห้อง</strong>, <strong class="text-sky-600 font-semibold">ตู้เลขที่</strong>, และ <strong class="text-emerald-600 font-semibold">ชั้นที่</strong>
             </p>
           </div>
           <!-- Clear / Reset Filter Button -->
@@ -187,73 +187,40 @@
 
         <!-- Main Search Input Bar -->
         <div class="space-y-4">
-          <div class="flex flex-col md:flex-row gap-3">
-            <!-- Search Scope Selector -->
-            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 shrink-0 shadow-sm">
-              <span class="text-xs text-slate-500 font-medium whitespace-nowrap">
-                <i class="fa-solid fa-filter text-blue-600 mr-1"></i>ค้นหาใน:
-              </span>
-              <select id="searchScopeSelect" onchange="executeSearch()" class="bg-slate-50 text-blue-700 font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer">
-                <option value="all_fields" selected>ทุกฟิลด์ (เลขที่ / ชื่อ-สกุล / ที่อยู่ / สังกัด / ตู้ / ชั้น / สถานะ)</option>
-                <option value="memberId">เฉพาะ "เลขที่สมาชิก"</option>
-                <option value="name">เฉพาะ "ชื่อ - สกุล"</option>
-                <option value="cabinet_shelf">เฉพาะ "ตู้เลขที่ / ชั้นที่"</option>
-                <option value="address">เฉพาะ "ที่อยู่"</option>
-                <option value="affiliation">เฉพาะ "สังกัด"</option>
-                <option value="status">เฉพาะ "สถานะภาพ (ปกติ/ลาออก)"</option>
-              </select>
-            </div>
-
+          <!-- Main Search Input Bar (Expanded & Enlarged) -->
+          <div class="flex flex-col sm:flex-row gap-3 items-stretch">
             <div class="relative flex-grow">
-              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                <i class="fa-solid fa-search text-lg"></i>
+              <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-blue-600 text-xl sm:text-2xl">
+                <i class="fa-solid fa-magnifying-glass"></i>
               </div>
               <input type="text" id="searchInput"
-                placeholder="พิมพ์คำค้นหา (เลขที่สมาชิก, ชื่อ-สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะ)..."
-                class="w-full pl-11 pr-11 py-3.5 sm:py-4 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 placeholder-slate-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
+                placeholder="พิมพ์คำค้นหา เช่น เลขที่สมาชิก, ชื่อ-สกุล, สังกัด, ห้อง, ตู้เลขที่, ชั้นที่, สถานะ..."
+                class="w-full pl-14 pr-12 py-4 sm:py-5 bg-white border-2 border-slate-200 hover:border-blue-300 focus:border-blue-600 rounded-2xl text-slate-800 placeholder-slate-400 text-base sm:text-lg font-medium focus:outline-none focus:ring-4 focus:ring-blue-100 transition shadow-sm"
                 autocomplete="off"
                 onkeyup="handleSearchKeyUp(event)"
                 oninput="handleSearchInput(event)">
-              <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer">
-                <i class="fa-solid fa-circle-xmark text-lg"></i>
+              <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-rose-500 transition cursor-pointer text-xl" title="ล้างคำค้นหา">
+                <i class="fa-solid fa-circle-xmark"></i>
               </button>
             </div>
-            <button onclick="executeSearch()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-7 py-3.5 sm:py-4 rounded-2xl transition shadow-md flex items-center justify-center gap-2 shrink-0 text-sm sm:text-base cursor-pointer">
-              <i class="fa-solid fa-search"></i>
+            <button onclick="executeSearch()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-4 sm:py-5 rounded-2xl transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2.5 shrink-0 text-base sm:text-lg cursor-pointer">
+              <i class="fa-solid fa-magnifying-glass"></i>
               <span>ค้นหา</span>
             </button>
           </div>
 
-          <!-- Quick Test Searches -->
-          <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-            <span class="text-slate-500 font-medium flex items-center gap-1 mr-1">
-              <i class="fa-solid fa-lightbulb text-amber-500"></i> คลิกทดสอบค้นหา:
-            </span>
-            <button type="button" onclick="setTestSearch('01263')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              รหัส 01263
-            </button>
-            <button type="button" onclick="setTestSearch('สุมาลี')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              สุมาลี
-            </button>
-            <button type="button" onclick="setTestSearch('คลองขุด')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              คลองขุด
-            </button>
-            <button type="button" onclick="setTestSearch('02002')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              รหัส 02002
-            </button>
-            <button type="button" onclick="setTestSearch('6')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              ตู้ 6
-            </button>
-            <button type="button" onclick="setTestSearch('5')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
-              ชั้น 5
-            </button>
-            <button type="button" onclick="setTestSearch('ลาออก')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg transition cursor-pointer font-medium">
-              <i class="fa-solid fa-user-xmark mr-1 text-[10px]"></i> สมาชิกลาออก
-            </button>
-          </div>
-
-          <!-- Quick Filters: Cabinet, Status & Affiliation Dropdowns -->
+          <!-- Quick Filters: Room, Cabinet, Status & Affiliation Dropdowns -->
           <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
+            <!-- Room Filter -->
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-door-open text-purple-600"></i> ห้อง:
+              </span>
+              <select id="roomSelect" onchange="executeSearch()" class="bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-purple-500 cursor-pointer font-medium">
+                <option value="">-- ทุกห้อง --</option>
+              </select>
+            </div>
+
             <!-- Cabinet Filter -->
             <div class="flex items-center gap-2">
               <span class="text-slate-500 font-medium flex items-center gap-1.5">
@@ -363,8 +330,8 @@
                     <th class="py-4 px-4 font-semibold w-14 text-center">ลำดับ</th>
                     <th class="py-4 px-5 font-semibold text-blue-600" id="thMemberId">เลขที่สมาชิก</th>
                     <th class="py-4 px-5 font-semibold">ชื่อ - สกุล</th>
-                    <th class="py-4 px-5 font-semibold">ที่อยู่</th>
                     <th class="py-4 px-5 font-semibold">สังกัด</th>
+                    <th class="py-4 px-4 font-semibold text-center w-24 text-purple-700">ห้อง</th>
                     <th class="py-4 px-4 font-semibold text-center w-24 text-blue-700">ตู้เลขที่</th>
                     <th class="py-4 px-4 font-semibold text-center w-24 text-amber-700">ชั้นที่</th>
                     <th class="py-4 px-4 font-semibold text-center w-28">สถานะภาพ</th>
@@ -503,30 +470,36 @@
           </div>
         </div>
 
-        <!-- ที่อยู่ -->
+        <!-- สังกัด -->
         <div>
-          <label class="block font-medium text-slate-700 mb-1">ที่อยู่</label>
-          <textarea id="inputAddress" rows="2" placeholder="เช่น 1250/197 ม.4 ต.คลองขุด อ.เมืองสตูล จ.สตูล"
-            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <label class="block font-medium text-slate-700 mb-1">สังกัด / หน่วยงาน</label>
+          <input type="text" id="inputAffiliation" list="affiliationSuggestions" placeholder="เช่น สอ.สสจ.สตูล จำกัด"
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <datalist id="affiliationSuggestions"></datalist>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <!-- สังกัด -->
+          <!-- ห้อง -->
           <div>
-            <label class="block font-medium text-slate-700 mb-1">สังกัด</label>
-            <input type="text" id="inputAffiliation" list="affiliationSuggestions" placeholder="เช่น สอ.สสจ.สตูล จำกัด"
-              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <datalist id="affiliationSuggestions"></datalist>
+            <label class="block font-medium text-slate-700 mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-door-open text-purple-600"></i> ห้อง
+            </label>
+            <input type="text" id="inputRoom" placeholder="เช่น ห้อง 1"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500">
           </div>
           <!-- ตู้เลขที่ -->
           <div>
-            <label class="block font-medium text-slate-700 mb-1">ตู้เลขที่ <span class="text-rose-500">*</span></label>
+            <label class="block font-medium text-slate-700 mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-box-archive text-blue-600"></i> ตู้เลขที่ <span class="text-rose-500">*</span>
+            </label>
             <input type="text" id="inputCabinet" required placeholder="เช่น 6"
               class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <!-- ชั้นที่ -->
           <div>
-            <label class="block font-medium text-slate-700 mb-1">ชั้นที่ <span class="text-rose-500">*</span></label>
+            <label class="block font-medium text-slate-700 mb-1 flex items-center gap-1">
+              <i class="fa-solid fa-layer-group text-amber-600"></i> ชั้นที่ <span class="text-rose-500">*</span>
+            </label>
             <input type="text" id="inputShelf" required placeholder="เช่น 5"
               class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
@@ -595,7 +568,7 @@
           <h4 class="font-bold text-slate-800 text-sm sm:text-base font-prompt">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์ Excel มาวางที่นี่</h4>
           <p class="text-slate-500 text-xs mt-1">รองรับ Microsoft Excel (.xlsx, .xls) หรือ CSV</p>
           <div class="inline-flex items-center gap-1.5 mt-3 text-xs text-emerald-800 bg-emerald-100/70 px-3 py-1 rounded-lg font-medium">
-            <i class="fa-solid fa-table-columns"></i> คอลัมน์: เลขที่สมาชิก, ชื่อ - สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะ
+            <i class="fa-solid fa-table-columns"></i> คอลัมน์: เลขที่สมาชิก, ชื่อ - สกุล, สังกัด, ห้อง, ตู้เลขที่, ชั้นที่, สถานะ
           </div>
         </div>
 
@@ -733,7 +706,7 @@
             <i class="fa-solid fa-circle-nodes text-blue-600"></i> โครงสร้างข้อมูลในระบบ:
           </div>
           <p class="text-slate-600 text-[11px]">
-            เลขที่สมาชิก, ชื่อ - สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะภาพ (ปกติ / ลาออก)
+            เลขที่สมาชิก, ชื่อ - สกุล, สังกัด, ห้อง, ตู้เลขที่, ชั้นที่, สถานะภาพ (ปกติ / ลาออก)
           </p>
         </div>
       </div>
@@ -769,9 +742,9 @@
     const STORAGE_DB_PROVIDER_KEY = 'stn_coop_db_provider_v1';
     const STORAGE_CACHE_KEY = 'stn_coop_member_cache_data_v2';
 
-    // Default Headers Schema for Registration Filing
+    // Default Headers Schema for Registration Filing (เลขที่สมาชิก, ชื่อ - สกุล, สังกัด, ห้อง, ตู้เลขที่, ชั้นที่, สถานะภาพ)
     const DEFAULT_HEADERS = [
-      'เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'
+      'เลขที่สมาชิก', 'ชื่อ - สกุล', 'สังกัด', 'ห้อง', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'
     ];
 
     // Application State
@@ -786,8 +759,8 @@
     let colIndexMap = {
       memberId: -1,
       name: -1,
-      address: -1,
       affiliation: -1,
+      room: -1,
       cabinet: -1,
       shelf: -1,
       status: -1
@@ -834,14 +807,85 @@
       }, 4000);
     }
 
+    // Normalize Dataset: Remove ที่อยู่, ensure ห้อง, ตู้, ชั้น, สถานะภาพ exist
+    function normalizeMemberDataset(headers, rows) {
+      let h = Array.isArray(headers) && headers.length > 0 ? [...headers] : [...DEFAULT_HEADERS];
+      let r = Array.isArray(rows) ? rows.map(row => [...row]) : [];
+
+      // 1. Remove address (ที่อยู่) column if present
+      const addrIdx = h.findIndex(title => {
+        const t = String(title || '').trim().toLowerCase();
+        return t.includes('ที่อยู่') || t.includes('address') || t.includes('ตำบล');
+      });
+
+      if (addrIdx !== -1) {
+        h.splice(addrIdx, 1);
+        r.forEach(row => {
+          if (row.length > addrIdx) {
+            row.splice(addrIdx, 1);
+          }
+        });
+      }
+
+      // 2. Ensure 'ห้อง' exists
+      let roomIdx = h.findIndex(title => {
+        const t = String(title || '').trim().toLowerCase();
+        return t.includes('ห้อง') || t.includes('room');
+      });
+
+      if (roomIdx === -1) {
+        // Place 'ห้อง' before 'ตู้' or after 'สังกัด'
+        const cabIdx = h.findIndex(title => String(title || '').includes('ตู้'));
+        if (cabIdx !== -1) {
+          h.splice(cabIdx, 0, 'ห้อง');
+          r.forEach(row => row.splice(cabIdx, 0, '-'));
+        } else {
+          h.push('ห้อง');
+          r.forEach(row => row.push('-'));
+        }
+      }
+
+      // 3. Ensure 'ตู้เลขที่' exists
+      let cabIdx = h.findIndex(title => String(title || '').includes('ตู้'));
+      if (cabIdx === -1) {
+        h.push('ตู้เลขที่');
+        r.forEach(row => row.push('-'));
+      }
+
+      // 4. Ensure 'ชั้นที่' exists
+      let shelfIdx = h.findIndex(title => String(title || '').includes('ชั้น'));
+      if (shelfIdx === -1) {
+        h.push('ชั้นที่');
+        r.forEach(row => row.push('-'));
+      }
+
+      // 5. Ensure 'สถานะภาพ' exists
+      let statusIdx = h.findIndex(title => {
+        const t = String(title || '').trim().toLowerCase();
+        return t.includes('สถานะ') || t.includes('สภาพ') || t.includes('status');
+      });
+
+      if (statusIdx === -1) {
+        h.push('สถานะภาพ');
+        r.forEach(row => row.push('ปกติ'));
+      } else {
+        r.forEach(row => {
+          if (statusIdx < row.length && (!row[statusIdx] || String(row[statusIdx]).trim() === '')) {
+            row[statusIdx] = 'ปกติ';
+          }
+        });
+      }
+
+      return { headers: h, rows: r };
+    }
 
     // Auto-detect Column Roles
     function detectColumnIndices(headers) {
       colIndexMap = {
         memberId: -1,
         name: -1,
-        address: -1,
         affiliation: -1,
+        room: -1,
         cabinet: -1,
         shelf: -1,
         status: -1
@@ -865,18 +909,18 @@
         )) {
           colIndexMap.name = idx;
         }
-        // Address / ที่อยู่
-        if (colIndexMap.address === -1 && (
-          text.includes('ที่อยู่') || text.includes('address') || text.includes('ตำบล')
-        )) {
-          colIndexMap.address = idx;
-        }
         // Affiliation / สังกัด / หน่วยงาน
         if (colIndexMap.affiliation === -1 && (
           text.includes('สังกัด') || text.includes('หน่วยงาน') || text.includes('หน่วย') || 
           text.includes('กลุ่มงาน') || text.includes('dept') || text.includes('affiliation')
         )) {
           colIndexMap.affiliation = idx;
+        }
+        // Room / ห้อง
+        if (colIndexMap.room === -1 && (
+          text.includes('ห้อง') || text.includes('ห้องที่') || text.includes('room')
+        )) {
+          colIndexMap.room = idx;
         }
         // Cabinet / ตู้เลขที่
         if (colIndexMap.cabinet === -1 && (
@@ -901,11 +945,11 @@
         }
       });
 
-      // Default positional fallbacks if not explicitly found
+      // Default positional fallbacks if not explicitly matched
       if (colIndexMap.memberId === -1 && headers.length > 0) colIndexMap.memberId = 0;
       if (colIndexMap.name === -1 && headers.length > 1) colIndexMap.name = 1;
-      if (colIndexMap.address === -1 && headers.length > 2) colIndexMap.address = 2;
-      if (colIndexMap.affiliation === -1 && headers.length > 3) colIndexMap.affiliation = 3;
+      if (colIndexMap.affiliation === -1 && headers.length > 2) colIndexMap.affiliation = 2;
+      if (colIndexMap.room === -1 && headers.length > 3) colIndexMap.room = 3;
       if (colIndexMap.cabinet === -1 && headers.length > 4) colIndexMap.cabinet = 4;
       if (colIndexMap.shelf === -1 && headers.length > 5) colIndexMap.shelf = 5;
       if (colIndexMap.status === -1 && headers.length > 6) colIndexMap.status = 6;
@@ -916,8 +960,8 @@
       const fields = {
         memberId: '',
         name: '',
-        address: '',
         affiliation: '',
+        room: '',
         cabinet: '',
         shelf: '',
         status: 'ปกติ'
@@ -931,11 +975,11 @@
       if (colIndexMap.name !== -1 && row[colIndexMap.name] !== undefined) {
         fields.name = String(row[colIndexMap.name]).trim();
       }
-      if (colIndexMap.address !== -1 && row[colIndexMap.address] !== undefined) {
-        fields.address = String(row[colIndexMap.address]).trim();
-      }
       if (colIndexMap.affiliation !== -1 && row[colIndexMap.affiliation] !== undefined) {
         fields.affiliation = String(row[colIndexMap.affiliation]).trim();
+      }
+      if (colIndexMap.room !== -1 && row[colIndexMap.room] !== undefined) {
+        fields.room = String(row[colIndexMap.room]).trim();
       }
       if (colIndexMap.cabinet !== -1 && row[colIndexMap.cabinet] !== undefined) {
         fields.cabinet = String(row[colIndexMap.cabinet]).trim();
@@ -1087,8 +1131,9 @@
           const data = await response.json();
 
           if (data && data.rows && Array.isArray(data.rows) && data.rows.length > 0) {
-            appHeaders = data.headers || [...DEFAULT_HEADERS];
-            rawDataRows = data.rows;
+            const normalized = normalizeMemberDataset(data.headers, data.rows);
+            appHeaders = normalized.headers;
+            rawDataRows = normalized.rows;
             detectColumnIndices(appHeaders);
             buildFiltersList();
             updateSummaryStats();
@@ -1130,8 +1175,9 @@
           try {
             const parsedCache = JSON.parse(cached);
             if (parsedCache && parsedCache.rows && parsedCache.rows.length > 0) {
-              appHeaders = parsedCache.headers || [...DEFAULT_HEADERS];
-              rawDataRows = parsedCache.rows || [];
+              const normalized = normalizeMemberDataset(parsedCache.headers, parsedCache.rows);
+              appHeaders = normalized.headers;
+              rawDataRows = normalized.rows;
               detectColumnIndices(appHeaders);
               buildFiltersList();
               updateSummaryStats();
@@ -1158,28 +1204,46 @@
       }
     }
 
-    // Populate Cabinet & Affiliations Dropdown Filters
+    // Populate Room, Cabinet & Affiliations Dropdown Filters
     function buildFiltersList() {
+      const roomSelect = document.getElementById('roomSelect');
       const cabinetSelect = document.getElementById('cabinetSelect');
       const affilSelect = document.getElementById('affiliationSelect');
       const affilDatalist = document.getElementById('affiliationSuggestions');
 
+      const currentRoom = roomSelect ? roomSelect.value : '';
       const currentCab = cabinetSelect ? cabinetSelect.value : '';
       const currentAffil = affilSelect ? affilSelect.value : '';
 
+      if (roomSelect) roomSelect.innerHTML = '<option value="">-- ทุกห้อง --</option>';
       if (cabinetSelect) cabinetSelect.innerHTML = '<option value="">-- ทุกตู้เอกสาร --</option>';
       if (affilSelect) affilSelect.innerHTML = '<option value="">-- ทุกสังกัด/หน่วยงาน --</option>';
       if (affilDatalist) affilDatalist.innerHTML = '';
 
+      const uniqueRooms = new Set();
       const uniqueCabinets = new Set();
       const uniqueAffils = new Set();
 
       rawDataRows.forEach(r => {
         const fields = getSearchableFields(r);
-        const cab = fields.cabinet.trim();
-        const aff = fields.affiliation.trim();
+        const rm = (fields.room || '').trim();
+        const cab = (fields.cabinet || '').trim();
+        const aff = (fields.affiliation || '').trim();
+        if (rm && rm !== '-') uniqueRooms.add(rm);
         if (cab && cab !== '-') uniqueCabinets.add(cab);
         if (aff && aff !== '-') uniqueAffils.add(aff);
+      });
+
+      // Populate Rooms Dropdown
+      const roomsList = Array.from(uniqueRooms).sort((a, b) => a.localeCompare(b, 'th'));
+      roomsList.forEach(rm => {
+        if (roomSelect) {
+          const opt = document.createElement('option');
+          opt.value = rm;
+          opt.innerText = rm.startsWith('ห้อง') ? rm : `ห้อง ${rm}`;
+          if (rm === currentRoom) opt.selected = true;
+          roomSelect.appendChild(opt);
+        }
       });
 
       // Sort cabinets naturally / numerically
@@ -1295,8 +1359,8 @@
       const clearBtn = document.getElementById('clearSearchBtn');
       if (clearBtn) clearBtn.classList.add('hidden');
 
-      const scopeSelect = document.getElementById('searchScopeSelect');
-      if (scopeSelect) scopeSelect.value = 'all_fields';
+      const roomSelect = document.getElementById('roomSelect');
+      if (roomSelect) roomSelect.value = '';
 
       const cabSelect = document.getElementById('cabinetSelect');
       if (cabSelect) cabSelect.value = '';
@@ -1311,26 +1375,15 @@
       executeSearch();
     }
 
-    function setTestSearch(term) {
-      const input = document.getElementById('searchInput');
-      if (input) {
-        input.value = term;
-        const clearBtn = document.getElementById('clearSearchBtn');
-        if (clearBtn) clearBtn.classList.remove('hidden');
-        currentPage = 1;
-        executeSearch();
-      }
-    }
-
     function showAllMembers() {
       resetAllFilters();
     }
 
-    // Core Search Execution for 6 Filing Fields + Status
+    // Core Search Execution for Filing Fields (เลขที่สมาชิก, ชื่อ-สกุล, สังกัด, ห้อง, ตู้, ชั้น, สถานะ)
     function executeSearch() {
       const queryInput = document.getElementById('searchInput');
       const rawQuery = queryInput ? queryInput.value.trim().toLowerCase() : '';
-      const searchScope = document.getElementById('searchScopeSelect') ? document.getElementById('searchScopeSelect').value : 'all_fields';
+      const roomFilter = document.getElementById('roomSelect') ? document.getElementById('roomSelect').value : '';
       const cabinetFilter = document.getElementById('cabinetSelect') ? document.getElementById('cabinetSelect').value : '';
       const affilFilter = document.getElementById('affiliationSelect') ? document.getElementById('affiliationSelect').value : '';
       const statusFilter = document.getElementById('statusSelect') ? document.getElementById('statusSelect').value : '';
@@ -1353,12 +1406,13 @@
       }
 
       const hasQuery = rawQuery.length > 0;
+      const hasRoomFilter = roomFilter !== '';
       const hasCabinetFilter = cabinetFilter !== '';
       const hasAffilFilter = affilFilter !== '';
       const hasStatusFilter = statusFilter !== '';
 
       // When there is no query and no dropdown filter selected, show all members immediately in the table!
-      if (!hasQuery && !hasCabinetFilter && !hasAffilFilter && !hasStatusFilter) {
+      if (!hasQuery && !hasRoomFilter && !hasCabinetFilter && !hasAffilFilter && !hasStatusFilter) {
         currentFilteredRows = [...rawDataRows];
         if (filteredRecordsCount) {
           filteredRecordsCount.innerText = currentFilteredRows.length.toLocaleString('th-TH');
@@ -1375,6 +1429,11 @@
       currentFilteredRows = rawDataRows.filter(row => {
         const fields = getSearchableFields(row);
 
+        // Filter by Room Dropdown
+        if (hasRoomFilter && fields.room !== roomFilter) {
+          return false;
+        }
+
         // Filter by Cabinet Dropdown
         if (hasCabinetFilter && fields.cabinet !== cabinetFilter) {
           return false;
@@ -1390,38 +1449,19 @@
           return false;
         }
 
-        // Search Query Match
+        // Search Query Match across all fields
         if (hasQuery) {
-          let matched = false;
           const cleanMemberId = fields.memberId.replace(/[-\s]/g, '').toLowerCase();
 
-          if (searchScope === 'memberId') {
-            matched = fields.memberId.toLowerCase().includes(rawQuery) || (cleanQuery.length >= 2 && cleanMemberId.includes(cleanQuery));
-          } else if (searchScope === 'name') {
-            matched = fields.name.toLowerCase().includes(rawQuery);
-          } else if (searchScope === 'cabinet_shelf') {
-            matched = fields.cabinet.toLowerCase().includes(rawQuery) || 
-                      `ตู้${fields.cabinet}`.toLowerCase().includes(rawQuery) ||
-                      fields.shelf.toLowerCase().includes(rawQuery) ||
-                      `ชั้น${fields.shelf}`.toLowerCase().includes(rawQuery);
-          } else if (searchScope === 'address') {
-            matched = fields.address.toLowerCase().includes(rawQuery);
-          } else if (searchScope === 'affiliation') {
-            matched = fields.affiliation.toLowerCase().includes(rawQuery);
-          } else if (searchScope === 'status') {
-            matched = fields.status.toLowerCase().includes(rawQuery);
-          } else {
-            // all_fields
-            const matchId = fields.memberId.toLowerCase().includes(rawQuery) || (cleanQuery.length >= 2 && cleanMemberId.includes(cleanQuery));
-            const matchName = fields.name.toLowerCase().includes(rawQuery);
-            const matchAddr = fields.address.toLowerCase().includes(rawQuery);
-            const matchAff = fields.affiliation.toLowerCase().includes(rawQuery);
-            const matchCab = fields.cabinet.toLowerCase().includes(rawQuery) || `ตู้${fields.cabinet}`.toLowerCase().includes(rawQuery);
-            const matchShelf = fields.shelf.toLowerCase().includes(rawQuery) || `ชั้น${fields.shelf}`.toLowerCase().includes(rawQuery);
-            const matchStatus = fields.status.toLowerCase().includes(rawQuery);
-            matched = matchId || matchName || matchAddr || matchAff || matchCab || matchShelf || matchStatus;
-          }
+          const matchId = fields.memberId.toLowerCase().includes(rawQuery) || (cleanQuery.length >= 2 && cleanMemberId.includes(cleanQuery));
+          const matchName = fields.name.toLowerCase().includes(rawQuery);
+          const matchAff = fields.affiliation.toLowerCase().includes(rawQuery);
+          const matchRoom = fields.room.toLowerCase().includes(rawQuery) || `ห้อง${fields.room}`.toLowerCase().includes(rawQuery);
+          const matchCab = fields.cabinet.toLowerCase().includes(rawQuery) || `ตู้${fields.cabinet}`.toLowerCase().includes(rawQuery);
+          const matchShelf = fields.shelf.toLowerCase().includes(rawQuery) || `ชั้น${fields.shelf}`.toLowerCase().includes(rawQuery);
+          const matchStatus = fields.status.toLowerCase().includes(rawQuery);
 
+          const matched = matchId || matchName || matchAff || matchRoom || matchCab || matchShelf || matchStatus;
           if (!matched) return false;
         }
 
@@ -1472,8 +1512,8 @@
         const fields = getSearchableFields(row);
         const memberId = fields.memberId || '-';
         const name = fields.name || '-';
-        const address = fields.address || '-';
         const affiliation = fields.affiliation || '-';
+        const room = fields.room || '-';
         const cabinet = fields.cabinet || '-';
         const shelf = fields.shelf || '-';
         const status = fields.status || 'ปกติ';
@@ -1497,12 +1537,14 @@
               ${escapeHtml(name)}
               ${isResigned ? '<span class="ml-1.5 text-[10px] text-rose-600 bg-rose-100/70 border border-rose-200 px-1.5 py-0.5 rounded-md font-medium">พ้นสภาพ</span>' : ''}
             </td>
-            <td class="py-3.5 px-5 text-slate-600 text-xs max-w-xs truncate" title="${escapeHtml(address)}">
-              ${escapeHtml(address)}
-            </td>
             <td class="py-3.5 px-5 text-slate-700 text-xs font-medium">
               <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
                 ${escapeHtml(affiliation)}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 shadow-sm group-hover:bg-purple-600 group-hover:text-white transition">
+                <i class="fa-solid fa-door-open mr-1.5 text-purple-500 group-hover:text-white text-[11px]"></i> ห้อง ${escapeHtml(room)}
               </span>
             </td>
             <td class="py-3.5 px-4 text-center">
@@ -1672,25 +1714,33 @@
         </div>
         ` : ''}
 
-        <!-- Prominent Location Highlight Banner -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center justify-around gap-4 shadow-sm">
+        <!-- Prominent Location Highlight Banner (ห้อง / ตู้ / ชั้น) -->
+        <div class="bg-gradient-to-r from-blue-50 via-purple-50 to-indigo-50 p-5 rounded-2xl border border-blue-200 grid grid-cols-1 sm:grid-cols-3 items-center justify-around gap-4 shadow-sm">
           <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-solid fa-door-open"></i>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 block font-medium">ห้องจัดเก็บ</span>
+              <strong class="text-xl sm:text-2xl text-purple-700 font-bold font-mono">ห้อง ${escapeHtml(fields.room || '-')}</strong>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 sm:border-l sm:border-slate-200 sm:pl-4">
             <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md">
               <i class="fa-solid fa-box-archive"></i>
             </div>
             <div>
               <span class="text-xs text-slate-500 block font-medium">ตู้เอกสารเลขที่</span>
-              <strong class="text-2xl text-blue-700 font-bold font-mono">ตู้ ${escapeHtml(cabinet)}</strong>
+              <strong class="text-xl sm:text-2xl text-blue-700 font-bold font-mono">ตู้ ${escapeHtml(cabinet)}</strong>
             </div>
           </div>
-          <div class="hidden sm:block w-px h-12 bg-blue-200"></div>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 sm:border-l sm:border-slate-200 sm:pl-4">
             <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md">
               <i class="fa-solid fa-layer-group"></i>
             </div>
             <div>
               <span class="text-xs text-slate-500 block font-medium">ชั้นวางเลขที่</span>
-              <strong class="text-2xl text-amber-700 font-bold font-mono">ชั้น ${escapeHtml(shelf)}</strong>
+              <strong class="text-xl sm:text-2xl text-amber-700 font-bold font-mono">ชั้น ${escapeHtml(shelf)}</strong>
             </div>
           </div>
         </div>
@@ -1724,12 +1774,12 @@
             </span>
           </div>
 
-          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-1">
-              <i class="fa-solid fa-location-dot text-rose-500 text-xs"></i> ที่อยู่
+          <div class="p-3.5 bg-white rounded-2xl border border-purple-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-purple-600 font-medium mb-1">
+              <i class="fa-solid fa-door-open text-purple-600 text-xs"></i> ห้อง
             </span>
-            <span class="font-medium text-slate-700 text-xs block leading-relaxed">
-              ${escapeHtml(fields.address || '-')}
+            <span class="font-bold text-purple-700 text-base block font-mono">
+              ห้อง ${escapeHtml(fields.room || '-')}
             </span>
           </div>
 
@@ -1805,8 +1855,8 @@
       const text = [
         `เลขที่สมาชิก: ${fields.memberId}`,
         `ชื่อ - สกุล: ${fields.name}`,
-        `ที่อยู่: ${fields.address}`,
         `สังกัด: ${fields.affiliation}`,
+        `ห้อง: ${fields.room || '-'}`,
         `ตู้เลขที่: ${fields.cabinet}`,
         `ชั้นที่: ${fields.shelf}`,
         `สถานะ: ${fields.status || 'ปกติ'}`
@@ -1832,7 +1882,7 @@
     function openAddMemberModal() {
       document.getElementById('formEditIndex').value = '-1';
       document.getElementById('formModalTitle').innerText = 'เพิ่มข้อมูลแฟ้มสมาชิกใหม่';
-      document.getElementById('formModalSubtitle').innerText = 'ระบุเลขที่สมาชิก ชื่อ ที่อยู่ สังกัด ตู้เลขที่ ชั้นที่ และสถานะภาพ';
+      document.getElementById('formModalSubtitle').innerText = 'ระบุเลขที่สมาชิก ชื่อ สังกัด ห้อง ตู้เลขที่ ชั้นที่ และสถานะภาพ';
       document.getElementById('formModalIcon').className = 'fa-solid fa-user-plus text-lg';
       document.getElementById('formModalIconBox').className = 'w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white';
 
@@ -1853,6 +1903,7 @@
         }
       }
       document.getElementById('inputMemberId').value = nextId;
+      if (document.getElementById('inputRoom')) document.getElementById('inputRoom').value = '';
       document.getElementById('inputCabinet').value = '6';
       document.getElementById('inputShelf').value = '5';
       const statusInput = document.getElementById('inputStatus');
@@ -1876,8 +1927,8 @@
 
       document.getElementById('inputMemberId').value = fields.memberId;
       document.getElementById('inputFullName').value = fields.name;
-      document.getElementById('inputAddress').value = fields.address;
       document.getElementById('inputAffiliation').value = fields.affiliation;
+      if (document.getElementById('inputRoom')) document.getElementById('inputRoom').value = fields.room || '';
       document.getElementById('inputCabinet').value = fields.cabinet;
       document.getElementById('inputShelf').value = fields.shelf;
       const statusInput = document.getElementById('inputStatus');
@@ -1910,15 +1961,21 @@
 
       const memberId = document.getElementById('inputMemberId').value.trim();
       const fullName = document.getElementById('inputFullName').value.trim();
-      const address = document.getElementById('inputAddress').value.trim();
       const affiliation = document.getElementById('inputAffiliation').value.trim();
+      const room = document.getElementById('inputRoom') ? document.getElementById('inputRoom').value.trim() : '';
       const cabinet = document.getElementById('inputCabinet').value.trim();
       const shelf = document.getElementById('inputShelf').value.trim();
       const status = document.getElementById('inputStatus') ? document.getElementById('inputStatus').value.trim() : 'ปกติ';
 
       // Ensure headers exist
       if (!appHeaders || appHeaders.length < 6) {
-        appHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+        appHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'สังกัด', 'ห้อง', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+        detectColumnIndices(appHeaders);
+      }
+
+      // Ensure room column exists in headers
+      if (colIndexMap.room === -1) {
+        appHeaders.splice(3, 0, 'ห้อง');
         detectColumnIndices(appHeaders);
       }
 
@@ -1935,8 +1992,8 @@
 
         if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
         if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
-        if (colIndexMap.address !== -1) rowToSave[colIndexMap.address] = address;
         if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
+        if (colIndexMap.room !== -1) rowToSave[colIndexMap.room] = room;
         if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
         if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
         if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
@@ -1948,8 +2005,8 @@
         const rowToSave = new Array(appHeaders.length).fill('');
         if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
         if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
-        if (colIndexMap.address !== -1) rowToSave[colIndexMap.address] = address;
         if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
+        if (colIndexMap.room !== -1) rowToSave[colIndexMap.room] = room;
         if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
         if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
         if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
@@ -1964,6 +2021,7 @@
       closeMemberFormModal();
       executeSearch();
     }
+
 
     // Delete Operations
     function confirmDeleteMemberByRawIndex(rawIndex) {
@@ -2154,12 +2212,12 @@
 
     // Download Sample Excel Template
     function downloadSampleExcelTemplate() {
-      const templateHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+      const templateHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'สังกัด', 'ห้อง', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
       const templateData = [
         templateHeaders,
-        ['01263', 'นางสุมาลี อรุณสวัสดิ์', '1250/197 ม.4 ต.คลองขุด อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
-        ['02795', 'น.ส.วิชุดา ชูระปา', '164 ม.5 ต.นิคมพัฒนา อ.กิ่งอำเภอมะนัง จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ลาออก'],
-        ['03412', 'นายวิญญู จันทร์เนตร', '88/12 ถ.สฤษดิ์ภูมินารถ ต.พิมาน อ.เมืองสตูล จ.สตูล', 'โรงพยาบาลสตูล', '6', '4', 'ปกติ']
+        ['01263', 'นางสุมาลี อรุณสวัสดิ์', 'สอ.สสจ.สตูล จำกัด', 'ห้อง 1', '6', '5', 'ปกติ'],
+        ['02795', 'น.ส.วิชุดา ชูระปา', 'สอ.สสจ.สตูล จำกัด', 'ห้อง 1', '6', '5', 'ลาออก'],
+        ['03412', 'นายวิญญู จันทร์เนตร', 'โรงพยาบาลสตูล', 'ห้อง 2', '6', '4', 'ปกติ']
       ];
 
       const ws = XLSX.utils.aoa_to_sheet(templateData);
@@ -2167,8 +2225,8 @@
       ws['!cols'] = [
         { wch: 15 }, // เลขที่สมาชิก
         { wch: 28 }, // ชื่อ - สกุล
-        { wch: 45 }, // ที่อยู่
         { wch: 25 }, // สังกัด
+        { wch: 12 }, // ห้อง
         { wch: 12 }, // ตู้เลขที่
         { wch: 12 }, // ชั้นที่
         { wch: 15 }  // สถานะภาพ
@@ -2261,8 +2319,9 @@
         if (cached) {
           const parsedCache = JSON.parse(cached);
           if (parsedCache && parsedCache.rows && parsedCache.rows.length > 0) {
-            appHeaders = parsedCache.headers || [...DEFAULT_HEADERS];
-            rawDataRows = parsedCache.rows || [];
+            const norm = normalizeMemberDataset(parsedCache.headers || [...DEFAULT_HEADERS], parsedCache.rows || []);
+            appHeaders = norm.headers;
+            rawDataRows = norm.rows;
             detectColumnIndices(appHeaders);
             buildFiltersList();
             updateSummaryStats();
