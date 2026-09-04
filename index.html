@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสืบค้นและจัดการทะเบียนสมาชิก - สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS (xlsx) for Excel Import & Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- FontAwesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Kanit & Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            kanit: ['Kanit', 'sans-serif'],
+            prompt: ['Prompt', 'sans-serif'],
+          },
+          colors: {
+            coop: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              gold: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+    .header-gradient {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+    }
+    .glass-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+    }
+    .glass-card-hover {
+      transition: all 0.2s ease-in-out;
+    }
+    .glass-card-hover:hover {
+      border-color: #93c5fd;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white !important; color: #0f172a !important; font-size: 11pt; }
+      .glass-card { background: white !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
+      table { border-collapse: collapse !important; width: 100% !important; }
+      th, td { border: 1px solid #cbd5e1 !important; color: #0f172a !important; padding: 6px 8px !important; }
+      th { background-color: #f1f5f9 !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <div>
+    <!-- Top Navigation & Header -->
+    <header class="header-gradient text-white shadow-2xl relative overflow-hidden no-print">
+      <!-- Decorative Glow -->
+      <div class="absolute -top-16 -right-16 w-80 h-80 bg-blue-500/25 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-0 left-1/4 w-96 h-36 bg-blue-500/15 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 relative">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <!-- Logo & Title -->
+          <div class="flex items-center space-x-4">
+            <div class="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-xl shrink-0">
+              <i class="fa-solid fa-folder-tree text-3xl text-sky-300"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="bg-amber-400/25 border border-amber-300/40 text-amber-200 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                  <i class="fa-solid fa-box-archive mr-1"></i> แฟ้มทะเบียนสมาชิก (ตู้/ชั้น)
+                </span>
+                <span class="bg-emerald-500/20 text-blue-200 text-xs font-medium px-2 py-0.5 rounded-full hidden sm:inline-block">
+                  สหกรณ์ออมทรัพย์
+                </span>
+              </div>
+              <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-1 font-prompt">
+                ระบบสืบค้นแฟ้มทะเบียนสมาชิก
+              </h1>
+              <p class="text-blue-100 text-xs sm:text-sm font-light">
+                ค้นหาตำแหน่งตู้และชั้นจัดเก็บเอกสาร - สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions Toolbar -->
+          <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+            <!-- Add Member Button -->
+            <button onclick="openAddMemberModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-blue-400/40 cursor-pointer">
+              <i class="fa-solid fa-user-plus mr-1.5 text-amber-300"></i>
+              <span>เพิ่มสมาชิกใหม่</span>
+            </button>
+
+            <!-- Import Excel Button -->
+            <button onclick="openImportExcelModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-emerald-400/40 cursor-pointer" title="นำเข้าข้อมูลสมาชิกจากไฟล์ Excel (.xlsx, .xls, .csv)">
+              <i class="fa-solid fa-file-excel mr-1.5 text-emerald-200"></i>
+              <span>นำเข้า Excel</span>
+            </button>
+
+
+            <!-- Toggle Sample vs Live Data -->
+            <button id="btnToggleSource" onclick="toggleDataSource()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition duration-200 flex items-center border border-white/20 shadow cursor-pointer" title="สลับระหว่างข้อมูลจริง Firebase กับข้อมูลจำลอง">
+              <i class="fa-solid fa-database mr-2 text-amber-300"></i>
+              <span id="btnToggleSourceText">ดูข้อมูลจำลอง (20 คน)</span>
+            </button>
+
+            <!-- Sync Button -->
+            <button onclick="fetchDatabaseData(true)" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition duration-200 flex items-center shadow-md border border-blue-400/30 cursor-pointer">
+              <i id="syncIcon" class="fa-solid fa-rotate mr-2"></i>
+              <span>รีเฟรชข้อมูล</span>
+            </button>
+
+            <!-- Database Config Modal Button -->
+            <button onclick="openConfigModal()" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 p-2 rounded-xl transition duration-200 border border-amber-300/30 shadow cursor-pointer" title="ตั้งค่าฐานข้อมูล Firebase Realtime Database">
+              <i class="fa-solid fa-database text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-5 mb-12 relative z-10">
+
+      <!-- Minimalist Connection Status Bar (No Dashboard Cards) -->
+      <div class="flex flex-wrap items-center justify-between gap-3 px-2 mb-4 text-xs text-slate-500 no-print">
+        <div class="flex items-center gap-2.5">
+          <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></div>
+          <span id="statusText" class="font-medium text-slate-700">พร้อมใช้งาน</span>
+          <span id="sourceBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">Firebase Realtime</span>
+          <span class="text-slate-300">|</span>
+          <span id="lastSyncTime" class="text-slate-400">กำลังเชื่อมต่อ...</span>
+        </div>
+      </div>
+
+      <!-- Search & Filters Container -->
+      <div class="glass-card rounded-3xl p-6 sm:p-7 shadow-sm mb-6 no-print border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 flex items-center font-prompt">
+              <i class="fa-solid fa-magnifying-glass mr-2.5 text-blue-600"></i>
+              สืบค้นตำแหน่งแฟ้มเอกสารสมาชิก
+            </h2>
+            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">
+              ค้นหาครอบคลุม: <strong class="text-blue-600 font-semibold">เลขที่สมาชิก</strong>, <strong class="text-amber-600 font-semibold">ชื่อ - สกุล</strong>, <strong class="text-indigo-600 font-semibold">ที่อยู่</strong>, <strong class="text-slate-700 font-semibold">สังกัด</strong>, <strong class="text-sky-600 font-semibold">ตู้เลขที่</strong>, และ <strong class="text-emerald-600 font-semibold">ชั้นที่</strong>
+            </p>
+          </div>
+          <!-- Clear / Reset Filter Button -->
+          <button onclick="resetAllFilters()" class="text-xs text-slate-500 hover:text-blue-600 self-start sm:self-auto flex items-center gap-1.5 transition cursor-pointer">
+            <i class="fa-solid fa-rotate-left"></i> ล้างการค้นหาทั้งหมด
+          </button>
+        </div>
+
+        <!-- Main Search Input Bar -->
+        <div class="space-y-4">
+          <div class="flex flex-col md:flex-row gap-3">
+            <!-- Search Scope Selector -->
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 shrink-0 shadow-sm">
+              <span class="text-xs text-slate-500 font-medium whitespace-nowrap">
+                <i class="fa-solid fa-filter text-blue-600 mr-1"></i>ค้นหาใน:
+              </span>
+              <select id="searchScopeSelect" onchange="executeSearch()" class="bg-slate-50 text-blue-700 font-semibold text-xs sm:text-sm focus:outline-none cursor-pointer">
+                <option value="all_fields" selected>ทุกฟิลด์ (เลขที่ / ชื่อ-สกุล / ที่อยู่ / สังกัด / ตู้ / ชั้น / สถานะ)</option>
+                <option value="memberId">เฉพาะ "เลขที่สมาชิก"</option>
+                <option value="name">เฉพาะ "ชื่อ - สกุล"</option>
+                <option value="cabinet_shelf">เฉพาะ "ตู้เลขที่ / ชั้นที่"</option>
+                <option value="address">เฉพาะ "ที่อยู่"</option>
+                <option value="affiliation">เฉพาะ "สังกัด"</option>
+                <option value="status">เฉพาะ "สถานะภาพ (ปกติ/ลาออก)"</option>
+              </select>
+            </div>
+
+            <div class="relative flex-grow">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <i class="fa-solid fa-search text-lg"></i>
+              </div>
+              <input type="text" id="searchInput"
+                placeholder="พิมพ์คำค้นหา (เลขที่สมาชิก, ชื่อ-สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะ)..."
+                class="w-full pl-11 pr-11 py-3.5 sm:py-4 bg-slate-50 border border-slate-300 rounded-2xl text-slate-800 placeholder-slate-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner"
+                autocomplete="off"
+                onkeyup="handleSearchKeyUp(event)"
+                oninput="handleSearchInput(event)">
+              <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                <i class="fa-solid fa-circle-xmark text-lg"></i>
+              </button>
+            </div>
+            <button onclick="executeSearch()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-7 py-3.5 sm:py-4 rounded-2xl transition shadow-md flex items-center justify-center gap-2 shrink-0 text-sm sm:text-base cursor-pointer">
+              <i class="fa-solid fa-search"></i>
+              <span>ค้นหา</span>
+            </button>
+          </div>
+
+          <!-- Quick Test Searches -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+            <span class="text-slate-500 font-medium flex items-center gap-1 mr-1">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i> คลิกทดสอบค้นหา:
+            </span>
+            <button type="button" onclick="setTestSearch('01263')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              รหัส 01263
+            </button>
+            <button type="button" onclick="setTestSearch('สุมาลี')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              สุมาลี
+            </button>
+            <button type="button" onclick="setTestSearch('คลองขุด')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              คลองขุด
+            </button>
+            <button type="button" onclick="setTestSearch('02002')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              รหัส 02002
+            </button>
+            <button type="button" onclick="setTestSearch('6')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              ตู้ 6
+            </button>
+            <button type="button" onclick="setTestSearch('5')" class="bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 px-2.5 py-1 rounded-lg transition cursor-pointer">
+              ชั้น 5
+            </button>
+            <button type="button" onclick="setTestSearch('ลาออก')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg transition cursor-pointer font-medium">
+              <i class="fa-solid fa-user-xmark mr-1 text-[10px]"></i> สมาชิกลาออก
+            </button>
+          </div>
+
+          <!-- Quick Filters: Cabinet, Status & Affiliation Dropdowns -->
+          <div class="flex flex-wrap items-center gap-3 pt-2 text-xs">
+            <!-- Cabinet Filter -->
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-box-archive text-blue-600"></i> ตู้เอกสาร:
+              </span>
+              <select id="cabinetSelect" onchange="executeSearch()" class="bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 cursor-pointer">
+                <option value="">-- ทุกตู้เอกสาร --</option>
+              </select>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="flex items-center gap-2">
+              <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-user-shield text-emerald-600"></i> สถานะ:
+              </span>
+              <select id="statusSelect" onchange="executeSearch()" class="bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 cursor-pointer font-medium">
+                <option value="">-- ทุกสถานะภาพ --</option>
+                <option value="ปกติ">เฉพาะ: ปกติ (สมาชิกปัจจุบัน)</option>
+                <option value="ลาออก">เฉพาะ: ลาออก (พ้นสภาพ)</option>
+              </select>
+            </div>
+
+            <!-- Affiliation Select Filter -->
+            <div class="ml-auto flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+              <span class="text-slate-500 font-medium flex items-center gap-1.5">
+                <i class="fa-solid fa-building-user text-indigo-600"></i> สังกัด:
+              </span>
+              <select id="affiliationSelect" onchange="executeSearch()" class="bg-slate-50 border border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-blue-500 w-full sm:w-56 cursor-pointer">
+                <option value="">-- ทุกสังกัด/หน่วยงาน --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result View Controls & Container -->
+      <div id="resultsContainer">
+        <!-- Initial Ready State -->
+        <div id="emptyState" class="glass-card rounded-3xl p-12 text-center shadow-sm no-print border border-slate-200">
+          <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border border-blue-100 shadow-sm">
+            <i class="fa-solid fa-id-card-clip"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 mb-1 font-prompt">พร้อมสำหรับการสืบค้นทะเบียนสมาชิก</h3>
+          <p class="text-slate-500 text-sm max-w-md mx-auto mb-4">
+            ป้อนคำค้นหา (ชื่อ-สกุล, เลขที่สมาชิก, หรือหน่วยงาน/สังกัด) หรือกดปุ่มด้านล่างเพื่อแสดงสมาชิกทั้งหมด
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button onclick="showAllMembers()" class="bg-slate-100 hover:bg-slate-200 text-blue-700 border border-slate-200 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition inline-flex items-center gap-2 cursor-pointer shadow-sm">
+              <i class="fa-solid fa-table-list"></i> แสดงรายชื่อสมาชิกทั้งหมด
+            </button>
+            <button onclick="openAddMemberModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition inline-flex items-center gap-2 cursor-pointer shadow">
+              <i class="fa-solid fa-user-plus"></i> เพิ่มสมาชิกใหม่
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading Spinner State -->
+        <div id="loadingState" class="hidden glass-card rounded-3xl p-12 text-center shadow-sm no-print border border-slate-200">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-500 border-t-transparent mb-4"></div>
+          <p class="text-slate-700 font-medium font-prompt">กำลังโหลดและซิงค์ข้อมูลสมาชิกจาก Firebase Realtime Database...</p>
+          <p class="text-slate-500 text-xs mt-1">โปรดรอสักครู่ ระบบกำลังประมวลผลข้อมูล</p>
+        </div>
+
+        <!-- Table Results View -->
+        <div id="tableResultsView" class="hidden space-y-4">
+          <!-- Toolbar above Table -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 no-print">
+            <div class="text-xs text-slate-500 flex items-center gap-2">
+              <span>แสดงผล</span>
+              <select id="pageSizeSelect" onchange="changePageSize(this.value)" class="bg-white border border-slate-300 text-slate-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-blue-500 cursor-pointer">
+                <option value="15">15 รายการ / หน้า</option>
+                <option value="25" selected>25 รายการ / หน้า</option>
+                <option value="50">50 รายการ / หน้า</option>
+                <option value="100">100 รายการ / หน้า</option>
+                <option value="all">แสดงทั้งหมด</option>
+              </select>
+              <span id="pageInfoText"></span>
+            </div>
+
+            <!-- Action Buttons above Table -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="openAddMemberModal()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow border border-blue-400/40 cursor-pointer">
+                <i class="fa-solid fa-user-plus text-amber-300"></i>
+                <span>เพิ่มสมาชิก</span>
+              </button>
+              <button onclick="openImportExcelModal()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow border border-emerald-600 cursor-pointer" title="นำเข้าข้อมูลจากไฟล์ Excel (.xlsx, .xls, .csv)">
+                <i class="fa-solid fa-file-import text-emerald-200"></i>
+                <span>นำเข้า Excel</span>
+              </button>
+              <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow border border-emerald-500/40 cursor-pointer" title="ส่งออกข้อมูลที่แสดงเป็นไฟล์ Excel">
+                <i class="fa-solid fa-file-excel text-emerald-100"></i>
+                <span>ส่งออก Excel</span>
+              </button>
+              <button onclick="window.print()" class="bg-white hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 shadow border border-slate-300 cursor-pointer" title="พิมพ์รายงาน">
+                <i class="fa-solid fa-print text-amber-500"></i>
+                <span>พิมพ์รายงาน</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Wrapper -->
+          <div class="glass-card rounded-3xl shadow-sm overflow-hidden border border-slate-200">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-700 uppercase text-xs tracking-wider border-b border-slate-200 font-prompt">
+                    <th class="py-4 px-4 font-semibold w-14 text-center">ลำดับ</th>
+                    <th class="py-4 px-5 font-semibold text-blue-600" id="thMemberId">เลขที่สมาชิก</th>
+                    <th class="py-4 px-5 font-semibold">ชื่อ - สกุล</th>
+                    <th class="py-4 px-5 font-semibold">ที่อยู่</th>
+                    <th class="py-4 px-5 font-semibold">สังกัด</th>
+                    <th class="py-4 px-4 font-semibold text-center w-24 text-blue-700">ตู้เลขที่</th>
+                    <th class="py-4 px-4 font-semibold text-center w-24 text-amber-700">ชั้นที่</th>
+                    <th class="py-4 px-4 font-semibold text-center w-28">สถานะภาพ</th>
+                    <th class="py-4 px-4 font-semibold text-center no-print w-36">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                  <!-- Rows injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div id="paginationContainer" class="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs no-print">
+              <div class="text-slate-500" id="paginationSummary"></div>
+              <div class="flex items-center gap-1" id="paginationButtons"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Not Found State -->
+        <div id="notFoundState" class="hidden glass-card rounded-3xl p-12 text-center shadow-sm no-print border border-slate-200">
+          <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl border border-rose-100">
+            <i class="fa-solid fa-user-xmark"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 mb-1 font-prompt">ไม่พบข้อมูลสมาชิกที่ตรงกับเงื่อนไข</h3>
+          <p class="text-slate-500 text-sm max-w-md mx-auto mb-4">
+            โปรดตรวจสอบคำค้นหาในช่อง (ชื่อ-สกุล, เลขที่สมาชิก, หรือหน่วย) หรือเลือกขอบเขตการค้นหาใหม่
+          </p>
+          <div class="flex flex-wrap items-center justify-center gap-2.5">
+            <button onclick="resetAllFilters()" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer border border-slate-300">
+              <i class="fa-solid fa-arrow-rotate-left"></i> ล้างการค้นหาและแสดงทั้งหมด
+            </button>
+            <button onclick="openAddMemberModal()" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer shadow">
+              <i class="fa-solid fa-user-plus"></i> เพิ่มเป็นสมาชิกใหม่
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Member Detail Modal -->
+  <div id="detailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <!-- Modal Header Banner -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white p-6 relative border-b border-blue-800">
+        <button onclick="closeModal()" class="absolute top-5 right-5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <div class="flex items-center gap-2 mb-2">
+          <span class="bg-white/20 border border-white/30 text-white text-xs px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <i class="fa-solid fa-id-badge"></i> ข้อมูลทะเบียนสมาชิกสหกรณ์
+          </span>
+          <span id="modalMemberTypeBadge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold"></span>
+        </div>
+
+        <div class="flex items-start justify-between gap-4 mt-1">
+          <div>
+            <h3 id="modalTitleName" class="text-2xl font-bold text-white font-prompt"></h3>
+            <p id="modalSubtitleMemberId" class="text-blue-200 text-sm mt-0.5 flex items-center gap-1.5 font-medium"></p>
+          </div>
+          <div id="modalStatusBadge" class="shrink-0 mt-1"></div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Member Details) -->
+      <div id="modalBody" class="p-6 overflow-y-auto space-y-4 flex-grow bg-slate-50">
+        <!-- Content dynamically generated by JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button id="btnQuickToggleStatus" onclick="quickToggleStatusFromDetailModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-arrows-rotate"></i> <span id="btnQuickToggleStatusText">เปลี่ยนสถานะ</span>
+          </button>
+          <button onclick="openEditFromDetailModal()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลนี้
+          </button>
+          <button onclick="deleteFromDetailModal()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-trash-can"></i> ลบสมาชิก
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="copyMemberSummary()" class="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-1.5 transition px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 cursor-pointer">
+            <i class="fa-regular fa-copy"></i> คัดลอกสรุป
+          </button>
+          <button onclick="printSingleMember()" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-medium text-xs transition cursor-pointer flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-print"></i> พิมพ์
+          </button>
+          <button onclick="closeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-medium text-xs transition cursor-pointer border border-slate-300">
+            ปิด
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Form Modal (Add / Edit) -->
+  <div id="memberFormModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[94vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-5 relative border-b border-blue-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="formModalIconBox" class="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white">
+            <i id="formModalIcon" class="fa-solid fa-user-plus text-lg"></i>
+          </div>
+          <div>
+            <h3 id="formModalTitle" class="text-xl font-bold font-prompt text-white">เพิ่มสมาชิกใหม่</h3>
+            <p id="formModalSubtitle" class="text-xs text-blue-200">กรอกข้อมูลสมาชิก สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด</p>
+          </div>
+        </div>
+        <button onclick="closeMemberFormModal()" class="text-white/80 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="memberForm" onsubmit="handleMemberFormSubmit(event)" class="p-6 overflow-y-auto space-y-4 flex-grow bg-slate-50/60 text-xs sm:text-sm">
+        <input type="hidden" id="formEditIndex" value="-1">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- เลขที่สมาชิก -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">เลขที่สมาชิก <span class="text-rose-500">*</span></label>
+            <input type="text" id="inputMemberId" required placeholder="เช่น 01263"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <!-- ชื่อ - สกุล -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">ชื่อ - สกุล <span class="text-rose-500">*</span></label>
+            <input type="text" id="inputFullName" required placeholder="เช่น นางสุมาลี อรุณสวัสดิ์"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <!-- ที่อยู่ -->
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">ที่อยู่</label>
+          <textarea id="inputAddress" rows="2" placeholder="เช่น 1250/197 ม.4 ต.คลองขุด อ.เมืองสตูล จ.สตูล"
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <!-- สังกัด -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">สังกัด</label>
+            <input type="text" id="inputAffiliation" list="affiliationSuggestions" placeholder="เช่น สอ.สสจ.สตูล จำกัด"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <datalist id="affiliationSuggestions"></datalist>
+          </div>
+          <!-- ตู้เลขที่ -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">ตู้เลขที่ <span class="text-rose-500">*</span></label>
+            <input type="text" id="inputCabinet" required placeholder="เช่น 6"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <!-- ชั้นที่ -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">ชั้นที่ <span class="text-rose-500">*</span></label>
+            <input type="text" id="inputShelf" required placeholder="เช่น 5"
+              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <!-- สถานะภาพสมาชิก (กรณีลาออก, ปกติ) -->
+        <div class="bg-slate-100/70 p-3.5 rounded-2xl border border-slate-200">
+          <label class="block font-semibold text-slate-800 mb-1.5 flex items-center justify-between">
+            <span class="flex items-center gap-1.5 text-xs sm:text-sm">
+              <i class="fa-solid fa-user-shield text-blue-600"></i> สถานะภาพสมาชิก <span class="text-rose-500">*</span>
+            </span>
+            <span class="text-[11px] font-normal text-slate-500">เลือก "ลาออก" หากพ้นสภาพสมาชิก</span>
+          </label>
+          <select id="inputStatus" required
+            class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="ปกติ" selected>ปกติ (สมาชิกปัจจุบัน)</option>
+            <option value="ลาออก">ลาออก (พ้นสภาพสมาชิก)</option>
+            <option value="เสียชีวิต">เสียชีวิต</option>
+            <option value="โอนย้าย">โอนย้าย</option>
+          </select>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="pt-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeMemberFormModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm transition cursor-pointer border border-slate-300">
+            ยกเลิก
+          </button>
+          <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition shadow-md cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Excel File Import Modal -->
+  <div id="importExcelModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xl w-full flex flex-col shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-emerald-800 to-teal-800 text-white p-5 relative border-b border-emerald-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-emerald-200">
+            <i class="fa-solid fa-file-excel text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold font-prompt text-white">นำเข้าข้อมูลสมาชิกจากไฟล์ Excel</h3>
+            <p class="text-xs text-emerald-200">รองรับไฟล์ .xlsx, .xls และ .csv</p>
+          </div>
+        </div>
+        <button onclick="closeImportExcelModal()" class="text-white/80 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4 text-xs sm:text-sm text-slate-600">
+        <!-- File Drop Zone -->
+        <div id="excelDropZone"
+          onclick="document.getElementById('excelFileInput').click()"
+          class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/50 hover:bg-emerald-50 rounded-2xl p-6 text-center cursor-pointer transition">
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelFileSelected(event)">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-2xl shadow-sm">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <h4 class="font-bold text-slate-800 text-sm sm:text-base font-prompt">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์ Excel มาวางที่นี่</h4>
+          <p class="text-slate-500 text-xs mt-1">รองรับ Microsoft Excel (.xlsx, .xls) หรือ CSV</p>
+          <div class="inline-flex items-center gap-1.5 mt-3 text-xs text-emerald-800 bg-emerald-100/70 px-3 py-1 rounded-lg font-medium">
+            <i class="fa-solid fa-table-columns"></i> คอลัมน์: เลขที่สมาชิก, ชื่อ - สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะ
+          </div>
+        </div>
+
+        <!-- File Preview Card (hidden until file selected) -->
+        <div id="excelPreviewCard" class="hidden p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-base">
+                <i class="fa-solid fa-file-circle-check"></i>
+              </div>
+              <div>
+                <strong id="excelFileName" class="text-slate-800 text-xs sm:text-sm font-semibold block"></strong>
+                <span id="excelFileStats" class="text-[11px] text-slate-500"></span>
+              </div>
+            </div>
+            <button type="button" onclick="clearSelectedExcelFile()" class="text-rose-500 hover:text-rose-700 text-xs flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-trash-can"></i> เปลี่ยนไฟล์
+            </button>
+          </div>
+
+          <!-- Import Mode Selection -->
+          <div class="pt-2 border-t border-slate-200">
+            <label class="block font-medium text-slate-700 mb-1.5">รูปแบบการนำเข้าข้อมูล:</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-400 text-xs">
+                <input type="radio" name="importMode" value="replace" checked class="text-emerald-600 focus:ring-emerald-500">
+                <span><strong>แทนที่ข้อมูลเดิม</strong> ทั้งหมด</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-emerald-400 text-xs">
+                <input type="radio" name="importMode" value="append" class="text-emerald-600 focus:ring-emerald-500">
+                <span><strong>เพิ่มต่อท้าย</strong> ข้อมูลเดิม</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template Download Note -->
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <span>ต้องการไฟล์ตัวอย่างหรือไม่?</span>
+          <button type="button" onclick="downloadSampleExcelTemplate()" class="text-emerald-700 hover:text-emerald-800 font-semibold inline-flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-download"></i> ดาวน์โหลดตัวอย่างไฟล์ Excel (.xlsx)
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2.5">
+        <button type="button" onclick="closeImportExcelModal()" class="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-medium transition border border-slate-300 cursor-pointer">
+          ยกเลิก
+        </button>
+        <button id="btnConfirmImportExcel" disabled onclick="confirmImportExcelData()" class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-file-import"></i>
+          <span>เริ่มนำเข้าข้อมูล</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteConfirmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-150 text-center">
+      <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl border border-rose-200 shadow-sm">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-800 font-prompt mb-2">ยืนยันการลบข้อมูลสมาชิก</h3>
+      <p class="text-slate-600 text-xs sm:text-sm mb-4">
+        คุณต้องการลบข้อมูลของ <strong id="deleteMemberName" class="text-rose-600"></strong><br>
+        (เลขที่สมาชิก: <span id="deleteMemberId" class="font-mono text-blue-600 font-bold"></span>) ใช่หรือไม่?
+      </p>
+      <p class="text-xs text-rose-700 bg-rose-50 p-2.5 rounded-xl border border-rose-200 mb-5">
+        ⚠️ ข้อมูลจะถูกลบออกจากฐานข้อมูลในระบบทันที
+      </p>
+      <input type="hidden" id="deleteTargetIndex" value="-1">
+      <div class="flex items-center justify-center gap-2.5">
+        <button onclick="closeDeleteConfirmModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer border border-slate-300">
+          ยกเลิก
+        </button>
+        <button onclick="executeDeleteMember()" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition shadow-md cursor-pointer flex items-center gap-1.5">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>ยืนยันลบข้อมูล</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database Configuration Modal (Firebase Realtime Database) -->
+  <div id="configModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xl w-full flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+      <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-5 border-b border-blue-800 flex items-center justify-between">
+        <h3 class="text-lg font-bold flex items-center gap-2.5 font-prompt">
+          <i class="fa-solid fa-fire text-amber-300"></i> ตั้งค่าฐานข้อมูล Firebase Realtime Database
+        </h3>
+        <button onclick="closeConfigModal()" class="text-white/60 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs sm:text-sm text-slate-600">
+        <!-- Firebase URL input -->
+        <div class="space-y-3">
+          <div>
+            <label class="block font-semibold text-slate-800 mb-1.5 flex items-center justify-between">
+              <span>URL ฐานข้อมูล Firebase Realtime Database:</span>
+              <span class="text-[11px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <i class="fa-solid fa-bolt"></i> Realtime Auto-Sync
+              </span>
+            </label>
+            <input type="text" id="firebaseUrlInput"
+              placeholder="https://membership-points-7d495-default-rtdb.asia-southeast1.firebasedatabase.app/"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+            <p class="text-slate-500 text-[11px] mt-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> ทุกการเพิ่ม ลบ แก้ไข หรือเปลี่ยนสถานะสมาชิก จะซิงค์ขึ้น Cloud อัตโนมัติทันที
+            </p>
+          </div>
+
+          <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 space-y-1.5 text-xs">
+            <div class="font-semibold text-amber-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-amber-600"></i> การตั้งค่าสิทธิ์ใน Firebase Console (Rules):
+            </div>
+            <p class="text-amber-800 text-[11px] leading-relaxed">
+              ใน Firebase Console &gt; Realtime Database &gt; แท็บ <strong>Rules</strong> กำหนดเป็น:
+            </p>
+            <pre class="bg-white/90 p-2.5 rounded-xl border border-amber-200 font-mono text-[11px] text-slate-700 overflow-x-auto">{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</pre>
+          </div>
+        </div>
+
+        <!-- Structure note -->
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+          <div class="font-semibold text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-nodes text-blue-600"></i> โครงสร้างข้อมูลในระบบ:
+          </div>
+          <p class="text-slate-600 text-[11px]">
+            เลขที่สมาชิก, ชื่อ - สกุล, ที่อยู่, สังกัด, ตู้เลขที่, ชั้นที่, สถานะภาพ (ปกติ / ลาออก)
+          </p>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
+        <button onclick="uploadCurrentDataToFirebase()" class="text-xs text-amber-700 hover:text-amber-800 font-semibold flex items-center gap-1.5 cursor-pointer bg-amber-100/70 hover:bg-amber-100 px-3.5 py-2 rounded-xl border border-amber-300 transition" title="ส่งข้อมูลปัจจุบันทั้งหมดขึ้น Firebase ทันที">
+          <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดข้อมูลขึ้น Firebase
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeConfigModal()" class="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer border border-slate-300">
+            ยกเลิก
+          </button>
+          <button onclick="saveDatabaseConfig()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-semibold transition shadow cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i> บันทึกและเชื่อมต่อ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white text-slate-500 text-xs py-6 border-t border-slate-200 mt-auto no-print">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+      <p class="text-slate-600 font-medium">© ระบบสืบค้นและจัดการทะเบียนสมาชิก - สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด</p>
+      <p class="text-slate-500">ออกแบบและพัฒนาระบบเพื่อประสิทธิภาพในการสืบค้น ค้นหา และบริหารจัดการข้อมูลสมาชิก</p>
+    </div>
+  </footer>
+
+  <script>
+    // Configuration & Keys (Firebase Realtime Database)
+    const DEFAULT_FIREBASE_URL = 'https://membership-points-7d495-default-rtdb.asia-southeast1.firebasedatabase.app/';
+    const STORAGE_FIREBASE_URL_KEY = 'stn_coop_firebase_url_v1';
+    const STORAGE_CACHE_KEY = 'stn_coop_member_cache_data_v1';
+
+    // Application State
+    let appHeaders = [];
+    let rawDataRows = [];
+    let currentFilteredRows = [];
+    let currentPage = 1;
+    let pageSize = 25;
+    let isUsingSampleMode = false;
+    let currentSelectedMemberRow = null;
+
+    // Column Indices (dynamically mapped from headers)
+    let colIndexMap = {
+      memberId: -1,
+      name: -1,
+      address: -1,
+      affiliation: -1,
+      cabinet: -1,
+      shelf: -1,
+      status: -1
+    };
+
+    // Realistic Fallback/Sample Member Dataset for สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด (ตรงตามชุดข้อมูลแฟ้มเอกสาร ตู้/ชั้น พร้อมสถานะ)
+    const SAMPLE_MEMBERS = {
+      headers: [
+        'เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'
+      ],
+      rows: [
+        ['01263', 'นางสุมาลี อรุณสวัสดิ์', '1250/197 ม.4 ต.คลองขุด อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['01362', 'นางลภัสรฎา บัวผุด', '652/25 ม.6 ต.คลองขุด อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['02002', 'นางสุจันทรี วันชวน', '176/27 ถ.สมันตประดิษฐ์ ต.พิมาน อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['02618', 'นายภาณุวัฒน์ ยิสาคร', '24/36 ถ.สตูลธานี ต.พิมาน อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['02795', 'น.ส.วิชุดา ชูระปา', '164 ม.5 ต.นิคมพัฒนา อ.กิ่งอำเภอมะนัง จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ลาออก'],
+        ['03373', 'นายดำรงค์ เหล่าทองคำ', '177 หมู่ 4 ตำบลคลองขุด อำเภอเมืองสตูล จังหวัดสตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['03412', 'นายวิญญู จันทร์เนตร', '88/12 ถ.สฤษดิ์ภูมินารถ ต.พิมาน อ.เมืองสตูล จ.สตูล', 'โรงพยาบาลสตูล', '6', '4', 'ปกติ'],
+        ['03550', 'นางสาวพัณณิตา แซ่ลิ้ม', '45/3 ม.2 ต.คลองขุด อ.เมืองสตูล จ.สตูล', 'โรงพยาบาลสตูล', '6', '4', 'ปกติ'],
+        ['03681', 'นางสาวกฤษณา วงค์สัมพันธ์', '12/4 ม.1 ต.ควนโดน อ.ควนโดน จ.สตูล', 'สำนักงานสาธารณสุขจังหวัดสตูล', '5', '3', 'ปกติ'],
+        ['03720', 'นางสาววณิชชา ช่วยพิชัย', '99/5 ม.3 ต.กำแพง อ.ละงู จ.สตูล', 'โรงพยาบาลละงู', '5', '2', 'ลาออก'],
+        ['03890', 'นายสมชาย ใจดีบริสุทธิ์', '34/2 ม.1 ต.ท่าแพ อ.ท่าแพ จ.สตูล', 'โรงพยาบาลท่าแพ', '4', '1', 'ปกติ'],
+        ['03915', 'นางสาวมาริสา ปัตตานี', '71/8 ม.4 ต.ทุ่งหว้า อ.ทุ่งหว้า จ.สตูล', 'โรงพยาบาลทุ่งหว้า', '4', '2', 'ปกติ'],
+        ['04012', 'นายการิม มะลิวัลย์', '15/2 ม.2 ต.ปาล์มพัฒนา อ.มะนัง จ.สตูล', 'โรงพยาบาลมะนัง', '3', '1', 'ปกติ'],
+        ['04105', 'นางจินตนา รัตนวรรณ', '230 ม.1 ต.ฉลุง อ.เมืองสตูล จ.สตูล', 'รพ.สต.ฉลุง', '3', '3', 'ปกติ']
+      ]
+    };
+
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Show Floating Toast
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgClass = type === 'success' ? 'bg-emerald-700 text-white border-emerald-600 shadow-xl' 
+                    : type === 'error' ? 'bg-rose-700 text-white border-rose-600 shadow-xl' 
+                    : 'bg-slate-800 text-white border-slate-700 shadow-xl';
+      const icon = type === 'success' ? 'fa-circle-check text-emerald-200' 
+                 : type === 'error' ? 'fa-circle-exclamation text-rose-200' 
+                 : 'fa-circle-info text-blue-200';
+
+      toast.className = `${bgClass} p-4 rounded-2xl shadow-2xl flex items-center gap-3 border pointer-events-auto transform transition duration-300 translate-y-2 opacity-0 text-xs sm:text-sm font-medium backdrop-blur-md`;
+      toast.innerHTML = `
+        <i class="fa-solid ${icon} text-lg shrink-0"></i>
+        <span class="flex-grow">${escapeHtml(message)}</span>
+        <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white cursor-pointer ml-1"><i class="fa-solid fa-xmark"></i></button>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 4000);
+    }
+
+
+    // Auto-detect Column Roles
+    function detectColumnIndices(headers) {
+      colIndexMap = {
+        memberId: -1,
+        name: -1,
+        address: -1,
+        affiliation: -1,
+        cabinet: -1,
+        shelf: -1,
+        status: -1
+      };
+
+      headers.forEach((h, idx) => {
+        const text = String(h || '').trim().toLowerCase();
+        
+        // Member ID / เลขที่สมาชิก
+        if (colIndexMap.memberId === -1 && (
+          text.includes('เลขที่') || text.includes('เลขสมาชิก') || text.includes('เลขทะเบียน') || 
+          text.includes('ทะเบียน') || text.includes('รหัสแฟ้ม') || text.includes('รหัสสมาชิก') || 
+          text.includes('member id') || text.includes('id')
+        )) {
+          colIndexMap.memberId = idx;
+        }
+        // Name / ชื่อ - สกุล
+        if (colIndexMap.name === -1 && (
+          text.includes('ชื่อ') || text.includes('นามสกุล') || text.includes('ชื่อ - สกุล') || 
+          text.includes('ชื่อ-สกุล') || text.includes('name')
+        )) {
+          colIndexMap.name = idx;
+        }
+        // Address / ที่อยู่
+        if (colIndexMap.address === -1 && (
+          text.includes('ที่อยู่') || text.includes('address') || text.includes('ตำบล')
+        )) {
+          colIndexMap.address = idx;
+        }
+        // Affiliation / สังกัด / หน่วยงาน
+        if (colIndexMap.affiliation === -1 && (
+          text.includes('สังกัด') || text.includes('หน่วยงาน') || text.includes('หน่วย') || 
+          text.includes('กลุ่มงาน') || text.includes('dept') || text.includes('affiliation')
+        )) {
+          colIndexMap.affiliation = idx;
+        }
+        // Cabinet / ตู้เลขที่
+        if (colIndexMap.cabinet === -1 && (
+          text.includes('ตู้เลขที่') || text.includes('ตู้ที่') || text.includes('ตู้') || 
+          text.includes('cabinet') || text.includes('locker')
+        )) {
+          colIndexMap.cabinet = idx;
+        }
+        // Shelf / ชั้นที่
+        if (colIndexMap.shelf === -1 && (
+          text.includes('ชั้นที่') || text.includes('ชั้น') || text.includes('shelf') || 
+          text.includes('level') || text.includes('floor')
+        )) {
+          colIndexMap.shelf = idx;
+        }
+        // Status / สถานะ / สถานะภาพ
+        if (colIndexMap.status === -1 && (
+          text.includes('สถานะ') || text.includes('สถานภาพ') || text.includes('สภาพ') || 
+          text.includes('status') || text.includes('ลาออก')
+        )) {
+          colIndexMap.status = idx;
+        }
+      });
+
+      // Default positional fallbacks if not explicitly found
+      if (colIndexMap.memberId === -1 && headers.length > 0) colIndexMap.memberId = 0;
+      if (colIndexMap.name === -1 && headers.length > 1) colIndexMap.name = 1;
+      if (colIndexMap.address === -1 && headers.length > 2) colIndexMap.address = 2;
+      if (colIndexMap.affiliation === -1 && headers.length > 3) colIndexMap.affiliation = 3;
+      if (colIndexMap.cabinet === -1 && headers.length > 4) colIndexMap.cabinet = 4;
+      if (colIndexMap.shelf === -1 && headers.length > 5) colIndexMap.shelf = 5;
+      if (colIndexMap.status === -1 && headers.length > 6) colIndexMap.status = 6;
+    }
+
+    // Extract filing & status fields from row
+    function getSearchableFields(row) {
+      const fields = {
+        memberId: '',
+        name: '',
+        address: '',
+        affiliation: '',
+        cabinet: '',
+        shelf: '',
+        status: 'ปกติ'
+      };
+
+      if (!row || !Array.isArray(row)) return fields;
+
+      if (colIndexMap.memberId !== -1 && row[colIndexMap.memberId] !== undefined) {
+        fields.memberId = String(row[colIndexMap.memberId]).trim();
+      }
+      if (colIndexMap.name !== -1 && row[colIndexMap.name] !== undefined) {
+        fields.name = String(row[colIndexMap.name]).trim();
+      }
+      if (colIndexMap.address !== -1 && row[colIndexMap.address] !== undefined) {
+        fields.address = String(row[colIndexMap.address]).trim();
+      }
+      if (colIndexMap.affiliation !== -1 && row[colIndexMap.affiliation] !== undefined) {
+        fields.affiliation = String(row[colIndexMap.affiliation]).trim();
+      }
+      if (colIndexMap.cabinet !== -1 && row[colIndexMap.cabinet] !== undefined) {
+        fields.cabinet = String(row[colIndexMap.cabinet]).trim();
+      }
+      if (colIndexMap.shelf !== -1 && row[colIndexMap.shelf] !== undefined) {
+        fields.shelf = String(row[colIndexMap.shelf]).trim();
+      }
+      if (colIndexMap.status !== -1 && row[colIndexMap.status] !== undefined) {
+        const rawStatus = String(row[colIndexMap.status]).trim();
+        fields.status = rawStatus || 'ปกติ';
+      }
+
+      return fields;
+    }
+
+    // Helper: Normalize Firebase RTDB URL to JSON endpoint
+    function getFirebaseMembersEndpoint(baseUrl) {
+      if (!baseUrl) baseUrl = DEFAULT_FIREBASE_URL;
+      let clean = baseUrl.trim();
+      if (!clean.endsWith('/')) clean += '/';
+      return clean + 'members.json';
+    }
+
+    // Save Data to Local Storage Cache & Sync to Firebase if connected
+    function saveDataToLocalStorage(syncToRemote = true) {
+      try {
+        localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify({
+          headers: appHeaders,
+          rows: rawDataRows,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (e) {
+        console.warn('Storage save error:', e);
+      }
+
+      if (syncToRemote) {
+        syncDataToFirebase();
+      }
+    }
+
+    // Background asynchronous sync to Firebase
+    async function syncDataToFirebase() {
+      const activeProvider = localStorage.getItem(STORAGE_DB_PROVIDER_KEY) || 'firebase';
+      if (activeProvider !== 'firebase') return;
+
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseMembersEndpoint(firebaseUrl);
+
+      try {
+        const payload = {
+          headers: appHeaders,
+          rows: rawDataRows,
+          updatedAt: new Date().toISOString()
+        };
+
+        const res = await fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          console.log('Firebase synced successfully:', rawDataRows.length, 'records');
+        } else {
+          console.warn('Firebase sync status note:', res.status, res.statusText);
+        }
+      } catch (err) {
+        console.warn('Firebase network sync notice:', err.message);
+      }
+    }
+
+    // Smart Sheet Processor (handles empty Column A or empty header rows)
+    function processSheetRows(jd) {
+      if (!jd || jd.length === 0) return null;
+
+      // Find header row: look for row with 'เลขที่' or 'ชื่อ' or 'ตู้' or 'สังกัด'
+      let headerIdx = -1;
+      for (let i = 0; i < Math.min(jd.length, 10); i++) {
+        const rowStr = (jd[i] || []).join(' ').toLowerCase();
+        if (rowStr.includes('เลขที่') || rowStr.includes('ชื่อ') || rowStr.includes('ตู้') || rowStr.includes('สังกัด') || rowStr.includes('สมาชิก')) {
+          headerIdx = i;
+          break;
+        }
+      }
+      if (headerIdx === -1) headerIdx = 0;
+
+      let rawHeaders = jd[headerIdx].map(h => String(h !== undefined && h !== null ? h : '').trim());
+      
+      // Determine if column A is blank (e.g., spreadsheet starts at col B)
+      let startCol = 0;
+      if (rawHeaders.length > 1 && rawHeaders[0] === '') {
+        const hasDataInCol0 = jd.slice(headerIdx + 1).some(r => r[0] && String(r[0]).trim() !== '');
+        if (!hasDataInCol0) startCol = 1;
+      }
+
+      // Collect non-empty headers starting from startCol
+      let headers = [];
+      for (let c = startCol; c < rawHeaders.length; c++) {
+        if (rawHeaders[c]) {
+          headers.push(rawHeaders[c]);
+        } else if (headers.length >= 6) {
+          break;
+        }
+      }
+      if (headers.length === 0) {
+        headers = rawHeaders.slice(startCol).filter(h => h !== '');
+      }
+      if (headers.length === 0) return null;
+
+      const numCols = headers.length;
+      const rows = [];
+      for (let i = headerIdx + 1; i < jd.length; i++) {
+        const r = jd[i] || [];
+        const slicedRow = r.slice(startCol, startCol + numCols);
+        while (slicedRow.length < numCols) slicedRow.push('');
+        const cleanedRow = slicedRow.map(c => String(c !== undefined && c !== null ? c : '').trim());
+        // keep row if at least one cell has content
+        if (cleanedRow.some(c => c !== '')) {
+          rows.push(cleanedRow);
+        }
+      }
+
+      return { headers, rows };
+    }
+
+    // Fetch Firebase Realtime Database Data
+    async function fetchDatabaseData(isManualTrigger = false) {
+      const syncIcon = document.getElementById('syncIcon');
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const sourceBadge = document.getElementById('sourceBadge');
+
+      if (syncIcon) syncIcon.classList.add('fa-spin');
+      if (statusDot) statusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+      if (statusText) statusText.innerText = 'กำลังเชื่อมต่อ Firebase Realtime Database...';
+
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseMembersEndpoint(firebaseUrl);
+
+      try {
+        const response = await fetch(endpoint, { cache: 'no-cache' });
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data && data.rows && Array.isArray(data.rows) && data.rows.length > 0) {
+            appHeaders = data.headers || ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+            rawDataRows = data.rows;
+            detectColumnIndices(appHeaders);
+            buildFiltersList();
+            updateSummaryStats();
+            saveDataToLocalStorage(false); // local only, already in Firebase
+
+            updateSyncStatusSuccess(`เชื่อมต่อ Firebase สำเร็จ (${rawDataRows.length} รายการ)`, 'Firebase Realtime');
+            if (isManualTrigger) {
+              showToast(`ดึงข้อมูลจาก Firebase สำเร็จ! (${rawDataRows.length} รายการ)`, 'success');
+            }
+            if (syncIcon) syncIcon.classList.remove('fa-spin');
+            executeSearch();
+            return;
+          } else {
+            // Database is newly created and empty: initialize with sample dataset and upload
+            console.log('Firebase node is empty. Initializing with sample data...');
+            appHeaders = [...SAMPLE_MEMBERS.headers];
+            rawDataRows = [...SAMPLE_MEMBERS.rows.map(r => [...r])];
+            detectColumnIndices(appHeaders);
+            buildFiltersList();
+            updateSummaryStats();
+            saveDataToLocalStorage(true); // upload initial data to Firebase
+
+            updateSyncStatusSuccess(`เชื่อมต่อ Firebase สำเร็จ (สร้างข้อมูลเริ่มต้นแล้ว)`, 'Firebase Realtime');
+            if (isManualTrigger) {
+              showToast('เชื่อมต่อ Firebase สำเร็จ และสร้างข้อมูลเริ่มต้นแล้ว', 'success');
+            }
+            if (syncIcon) syncIcon.classList.remove('fa-spin');
+            executeSearch();
+            return;
+          }
+        } else {
+          throw new Error(`Firebase ตอบกลับสถานะ ${response.status} (${response.statusText})`);
+        }
+      } catch (err) {
+        console.warn('Firebase connection note:', err);
+
+        // Fallback to cache or sample data
+        const cached = localStorage.getItem(STORAGE_CACHE_KEY);
+        if (cached) {
+          try {
+            const parsedCache = JSON.parse(cached);
+            if (parsedCache && parsedCache.rows && parsedCache.rows.length > 0) {
+              appHeaders = parsedCache.headers || [];
+              rawDataRows = parsedCache.rows || [];
+              detectColumnIndices(appHeaders);
+              buildFiltersList();
+              updateSummaryStats();
+              updateSyncStatusSuccess('ใช้งานข้อมูลแคชในเครื่อง (Firebase กำลังรอเชื่อมต่อ)', 'แคชในเครื่อง');
+              if (syncIcon) syncIcon.classList.remove('fa-spin');
+              executeSearch();
+              return;
+            }
+          } catch (e) {}
+        }
+
+        // Fallback to sample dataset
+        appHeaders = [...SAMPLE_MEMBERS.headers];
+        rawDataRows = [...SAMPLE_MEMBERS.rows.map(r => [...r])];
+        detectColumnIndices(appHeaders);
+        buildFiltersList();
+        updateSummaryStats();
+        updateSyncStatusSuccess('ใช้งานชุดข้อมูลตัวอย่าง (Firebase Offline)', 'ข้อมูลตัวอย่าง');
+        if (isManualTrigger) {
+          showToast('ไม่สามารถเชื่อมต่อ Firebase ได้ กำลังใช้ข้อมูลตัวอย่าง (โปรดตรวจ Rules ใน Firebase)', 'error');
+        }
+        if (syncIcon) syncIcon.classList.remove('fa-spin');
+        executeSearch();
+      }
+    }
+
+    // Populate Cabinet & Affiliations Dropdown Filters
+    function buildFiltersList() {
+      const cabinetSelect = document.getElementById('cabinetSelect');
+      const affilSelect = document.getElementById('affiliationSelect');
+      const affilDatalist = document.getElementById('affiliationSuggestions');
+
+      const currentCab = cabinetSelect ? cabinetSelect.value : '';
+      const currentAffil = affilSelect ? affilSelect.value : '';
+
+      if (cabinetSelect) cabinetSelect.innerHTML = '<option value="">-- ทุกตู้เอกสาร --</option>';
+      if (affilSelect) affilSelect.innerHTML = '<option value="">-- ทุกสังกัด/หน่วยงาน --</option>';
+      if (affilDatalist) affilDatalist.innerHTML = '';
+
+      const uniqueCabinets = new Set();
+      const uniqueAffils = new Set();
+
+      rawDataRows.forEach(r => {
+        const fields = getSearchableFields(r);
+        const cab = fields.cabinet.trim();
+        const aff = fields.affiliation.trim();
+        if (cab && cab !== '-') uniqueCabinets.add(cab);
+        if (aff && aff !== '-') uniqueAffils.add(aff);
+      });
+
+      // Sort cabinets naturally / numerically
+      const cabinetsList = Array.from(uniqueCabinets).sort((a, b) => {
+        const numA = parseFloat(a);
+        const numB = parseFloat(b);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.localeCompare(b, 'th');
+      });
+
+      cabinetsList.forEach(cab => {
+        if (cabinetSelect) {
+          const opt = document.createElement('option');
+          opt.value = cab;
+          opt.innerText = `ตู้เลขที่ ${cab}`;
+          if (cab === currentCab) opt.selected = true;
+          cabinetSelect.appendChild(opt);
+        }
+      });
+
+      const affilList = Array.from(uniqueAffils).sort((a, b) => a.localeCompare(b, 'th'));
+      affilList.forEach(aff => {
+        if (affilSelect) {
+          const opt = document.createElement('option');
+          opt.value = aff;
+          opt.innerText = aff;
+          if (aff === currentAffil) opt.selected = true;
+          affilSelect.appendChild(opt);
+        }
+        if (affilDatalist) {
+          const optDl = document.createElement('option');
+          optDl.value = aff;
+          affilDatalist.appendChild(optDl);
+        }
+      });
+    }
+
+    // Update Statistics Badges
+    function updateSummaryStats() {
+      const totalEl = document.getElementById('totalRecordsCount');
+      const cabinetsEl = document.getElementById('totalCabinetsCount');
+      const affilEl = document.getElementById('totalAffiliationsCount');
+
+      if (totalEl) totalEl.innerText = rawDataRows.length.toLocaleString('th-TH');
+
+      const uniqueCabinets = new Set();
+      const uniqueAffiliations = new Set();
+
+      rawDataRows.forEach(r => {
+        const fields = getSearchableFields(r);
+        if (fields.cabinet && fields.cabinet !== '-') uniqueCabinets.add(fields.cabinet.trim());
+        if (fields.affiliation && fields.affiliation !== '-') uniqueAffiliations.add(fields.affiliation.trim());
+      });
+
+      if (cabinetsEl) cabinetsEl.innerText = uniqueCabinets.size.toLocaleString('th-TH');
+      if (affilEl) affilEl.innerText = uniqueAffiliations.size.toLocaleString('th-TH');
+    }
+
+    // Update Connection Indicator
+    function updateSyncStatusSuccess(msg = 'เชื่อมต่อฐานข้อมูล Firebase สำเร็จ', badge = 'Firebase Realtime') {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const lastSyncTime = document.getElementById('lastSyncTime');
+      const sourceBadge = document.getElementById('sourceBadge');
+
+      if (statusDot) statusDot.className = 'w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20';
+      if (statusText) statusText.innerText = msg;
+      if (sourceBadge) sourceBadge.innerText = badge;
+      if (lastSyncTime) {
+        const now = new Date();
+        lastSyncTime.innerText = `อัปเดตล่าสุด: ${now.toLocaleDateString('th-TH')} เวลา ${now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.`;
+      }
+    }
+
+    // Search Handlers
+    function handleSearchKeyUp(event) {
+      if (event.key === 'Enter') executeSearch();
+    }
+
+    function handleSearchInput(event) {
+      const val = event.target.value;
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) {
+        if (val.length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
+      currentPage = 1;
+      executeSearch();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      currentPage = 1;
+      executeSearch();
+    }
+
+    function resetAllFilters() {
+      const input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (clearBtn) clearBtn.classList.add('hidden');
+
+      const scopeSelect = document.getElementById('searchScopeSelect');
+      if (scopeSelect) scopeSelect.value = 'all_fields';
+
+      const cabSelect = document.getElementById('cabinetSelect');
+      if (cabSelect) cabSelect.value = '';
+
+      const affilSelect = document.getElementById('affiliationSelect');
+      if (affilSelect) affilSelect.value = '';
+
+      const statSelect = document.getElementById('statusSelect');
+      if (statSelect) statSelect.value = '';
+
+      currentPage = 1;
+      executeSearch();
+    }
+
+    function setTestSearch(term) {
+      const input = document.getElementById('searchInput');
+      if (input) {
+        input.value = term;
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        currentPage = 1;
+        executeSearch();
+      }
+    }
+
+    function toggleDataSource() {
+      isUsingSampleMode = !isUsingSampleMode;
+      const toggleBtnText = document.getElementById('btnToggleSourceText');
+      if (isUsingSampleMode) {
+        appHeaders = [...SAMPLE_MEMBERS.headers];
+        rawDataRows = [...SAMPLE_MEMBERS.rows.map(r => [...r])];
+        detectColumnIndices(appHeaders);
+        buildFiltersList();
+        updateSummaryStats();
+        updateSyncStatusSuccess(`ใช้งานข้อมูลตัวอย่าง (${rawDataRows.length} รายการ)`, 'ข้อมูลตัวอย่าง');
+        if (toggleBtnText) toggleBtnText.innerText = 'สลับดูข้อมูลจริง Firebase';
+        showToast(`สลับมาใช้ข้อมูลตัวอย่าง (${rawDataRows.length} รายการ) เรียบร้อยแล้ว`, 'info');
+      } else {
+        if (toggleBtnText) toggleBtnText.innerText = 'ดูข้อมูลตัวอย่าง';
+        fetchDatabaseData(true);
+      }
+      currentPage = 1;
+      executeSearch();
+    }
+
+    function showAllMembers() {
+      resetAllFilters();
+      const input = document.getElementById('searchInput');
+      if (input) input.value = ' ';
+      executeSearch();
+      if (input) input.value = '';
+    }
+
+    // Core Search Execution for 6 Filing Fields + Status
+    function executeSearch() {
+      const queryInput = document.getElementById('searchInput');
+      const rawQuery = queryInput ? queryInput.value.trim().toLowerCase() : '';
+      const searchScope = document.getElementById('searchScopeSelect') ? document.getElementById('searchScopeSelect').value : 'all_fields';
+      const cabinetFilter = document.getElementById('cabinetSelect') ? document.getElementById('cabinetSelect').value : '';
+      const affilFilter = document.getElementById('affiliationSelect') ? document.getElementById('affiliationSelect').value : '';
+      const statusFilter = document.getElementById('statusSelect') ? document.getElementById('statusSelect').value : '';
+
+      const emptyState = document.getElementById('emptyState');
+      const loadingState = document.getElementById('loadingState');
+      const tableResultsView = document.getElementById('tableResultsView');
+      const notFoundState = document.getElementById('notFoundState');
+      const filteredRecordsCount = document.getElementById('filteredRecordsCount');
+
+      if (emptyState) emptyState.classList.add('hidden');
+      if (loadingState) loadingState.classList.add('hidden');
+      if (tableResultsView) tableResultsView.classList.add('hidden');
+      if (notFoundState) notFoundState.classList.add('hidden');
+
+      if (!rawDataRows || rawDataRows.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        if (filteredRecordsCount) filteredRecordsCount.innerText = '0';
+        return;
+      }
+
+      const hasQuery = rawQuery.length > 0;
+      const hasCabinetFilter = cabinetFilter !== '';
+      const hasAffilFilter = affilFilter !== '';
+      const hasStatusFilter = statusFilter !== '';
+
+      if (!hasQuery && !hasCabinetFilter && !hasAffilFilter && !hasStatusFilter) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        if (filteredRecordsCount) filteredRecordsCount.innerText = '0';
+        return;
+      }
+
+      const cleanQuery = rawQuery.replace(/[-\s]/g, '');
+
+      currentFilteredRows = rawDataRows.filter(row => {
+        const fields = getSearchableFields(row);
+
+        // Filter by Cabinet Dropdown
+        if (hasCabinetFilter && fields.cabinet !== cabinetFilter) {
+          return false;
+        }
+
+        // Filter by Affiliation Dropdown
+        if (hasAffilFilter && fields.affiliation !== affilFilter) {
+          return false;
+        }
+
+        // Filter by Status Dropdown
+        if (hasStatusFilter && fields.status !== statusFilter) {
+          return false;
+        }
+
+        // Search Query Match
+        if (hasQuery) {
+          let matched = false;
+          const cleanMemberId = fields.memberId.replace(/[-\s]/g, '').toLowerCase();
+
+          if (searchScope === 'memberId') {
+            matched = fields.memberId.toLowerCase().includes(rawQuery) || (cleanQuery.length >= 2 && cleanMemberId.includes(cleanQuery));
+          } else if (searchScope === 'name') {
+            matched = fields.name.toLowerCase().includes(rawQuery);
+          } else if (searchScope === 'cabinet_shelf') {
+            matched = fields.cabinet.toLowerCase().includes(rawQuery) || 
+                      `ตู้${fields.cabinet}`.toLowerCase().includes(rawQuery) ||
+                      fields.shelf.toLowerCase().includes(rawQuery) ||
+                      `ชั้น${fields.shelf}`.toLowerCase().includes(rawQuery);
+          } else if (searchScope === 'address') {
+            matched = fields.address.toLowerCase().includes(rawQuery);
+          } else if (searchScope === 'affiliation') {
+            matched = fields.affiliation.toLowerCase().includes(rawQuery);
+          } else if (searchScope === 'status') {
+            matched = fields.status.toLowerCase().includes(rawQuery);
+          } else {
+            // all_fields
+            const matchId = fields.memberId.toLowerCase().includes(rawQuery) || (cleanQuery.length >= 2 && cleanMemberId.includes(cleanQuery));
+            const matchName = fields.name.toLowerCase().includes(rawQuery);
+            const matchAddr = fields.address.toLowerCase().includes(rawQuery);
+            const matchAff = fields.affiliation.toLowerCase().includes(rawQuery);
+            const matchCab = fields.cabinet.toLowerCase().includes(rawQuery) || `ตู้${fields.cabinet}`.toLowerCase().includes(rawQuery);
+            const matchShelf = fields.shelf.toLowerCase().includes(rawQuery) || `ชั้น${fields.shelf}`.toLowerCase().includes(rawQuery);
+            const matchStatus = fields.status.toLowerCase().includes(rawQuery);
+            matched = matchId || matchName || matchAddr || matchAff || matchCab || matchShelf || matchStatus;
+          }
+
+          if (!matched) return false;
+        }
+
+        return true;
+      });
+
+      if (filteredRecordsCount) {
+        filteredRecordsCount.innerText = currentFilteredRows.length.toLocaleString('th-TH');
+      }
+
+      if (currentFilteredRows.length === 0) {
+        if (notFoundState) notFoundState.classList.remove('hidden');
+        return;
+      }
+
+      if (tableResultsView) {
+        tableResultsView.classList.remove('hidden');
+        renderTablePage();
+      }
+    }
+
+    // Paginated Table Rendering for 6 Columns
+    function renderTablePage() {
+      const tbody = document.getElementById('tableBody');
+      if (!tbody) return;
+
+      const totalItems = currentFilteredRows.length;
+      let startIdx = 0;
+      let endIdx = totalItems;
+
+      if (pageSize !== 'all') {
+        const numPerPage = parseInt(pageSize, 10);
+        const totalPages = Math.ceil(totalItems / numPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        startIdx = (currentPage - 1) * numPerPage;
+        endIdx = Math.min(startIdx + numPerPage, totalItems);
+      }
+
+      const rowsToShow = currentFilteredRows.slice(startIdx, endIdx);
+
+      tbody.innerHTML = rowsToShow.map((row, relativeIdx) => {
+        const overallIdx = startIdx + relativeIdx;
+        const no = overallIdx + 1;
+        const rawIndex = rawDataRows.indexOf(row);
+
+        const fields = getSearchableFields(row);
+        const memberId = fields.memberId || '-';
+        const name = fields.name || '-';
+        const address = fields.address || '-';
+        const affiliation = fields.affiliation || '-';
+        const cabinet = fields.cabinet || '-';
+        const shelf = fields.shelf || '-';
+        const status = fields.status || 'ปกติ';
+        const isResigned = status.includes('ลาออก');
+
+        const statusBadge = isResigned
+          ? `<span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 shadow-sm"><i class="fa-solid fa-user-xmark mr-1.5 text-rose-500 text-[11px]"></i> ลาออก</span>`
+          : `<span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm"><i class="fa-solid fa-circle-check mr-1.5 text-emerald-500 text-[11px]"></i> ปกติ</span>`;
+
+        const rowBgClass = isResigned ? 'bg-rose-50/20 hover:bg-rose-50/50' : 'hover:bg-blue-50/50';
+
+        return `
+          <tr class="${rowBgClass} transition cursor-pointer group" onclick="openModalByRawIndex(${rawIndex})">
+            <td class="py-3.5 px-4 text-center font-medium text-slate-400 text-xs">${no}</td>
+            <td class="py-3.5 px-5 font-mono font-bold text-blue-600 text-sm">
+              <span class="bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 group-hover:border-blue-400 group-hover:bg-blue-100/70 transition inline-block">
+                ${escapeHtml(memberId)}
+              </span>
+            </td>
+            <td class="py-3.5 px-5 font-medium text-slate-800 group-hover:text-blue-600 transition">
+              ${escapeHtml(name)}
+              ${isResigned ? '<span class="ml-1.5 text-[10px] text-rose-600 bg-rose-100/70 border border-rose-200 px-1.5 py-0.5 rounded-md font-medium">พ้นสภาพ</span>' : ''}
+            </td>
+            <td class="py-3.5 px-5 text-slate-600 text-xs max-w-xs truncate" title="${escapeHtml(address)}">
+              ${escapeHtml(address)}
+            </td>
+            <td class="py-3.5 px-5 text-slate-700 text-xs font-medium">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                ${escapeHtml(affiliation)}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-sm group-hover:bg-blue-600 group-hover:text-white transition">
+                <i class="fa-solid fa-box-archive mr-1.5 text-blue-500 group-hover:text-white text-[11px]"></i> ตู้ ${escapeHtml(cabinet)}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 shadow-sm group-hover:bg-amber-500 group-hover:text-white transition">
+                <i class="fa-solid fa-layer-group mr-1.5 text-amber-500 group-hover:text-white text-[11px]"></i> ชั้น ${escapeHtml(shelf)}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-center">
+              ${statusBadge}
+            </td>
+            <td class="py-3.5 px-4 text-center no-print">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="event.stopPropagation(); openModalByRawIndex(${rawIndex})" class="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 px-2.5 py-1 rounded-lg text-xs transition border border-blue-200 hover:border-blue-600 shadow-sm cursor-pointer font-medium" title="ดูรายละเอียดตำแหน่งแฟ้ม">
+                  <i class="fa-solid fa-eye mr-1"></i> ดู
+                </button>
+                <button onclick="event.stopPropagation(); openEditMemberModalByRawIndex(${rawIndex})" class="text-amber-700 hover:text-white bg-amber-50 hover:bg-amber-500 px-2.5 py-1 rounded-lg text-xs transition border border-amber-200 hover:border-amber-500 shadow-sm cursor-pointer font-medium" title="แก้ไขข้อมูล">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไข
+                </button>
+                <button onclick="event.stopPropagation(); confirmDeleteMemberByRawIndex(${rawIndex})" class="text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 px-2 py-1 rounded-lg text-xs transition border border-rose-200 hover:border-rose-600 shadow-sm cursor-pointer" title="ลบข้อมูล">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      renderPaginationControls(totalItems, startIdx, endIdx);
+    }
+
+    // Pagination Controls UI
+    function renderPaginationControls(totalItems, startIdx, endIdx) {
+      const summaryEl = document.getElementById('paginationSummary');
+      const buttonsEl = document.getElementById('paginationButtons');
+      const pageInfoEl = document.getElementById('pageInfoText');
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `แสดง <strong>${totalItems > 0 ? startIdx + 1 : 0} - ${endIdx}</strong> จากทั้งหมด <strong>${totalItems.toLocaleString('th-TH')}</strong> รายการ`;
+      }
+      if (pageInfoEl) {
+        pageInfoEl.innerText = `(${totalItems.toLocaleString('th-TH')} รายการ)`;
+      }
+
+      if (!buttonsEl) return;
+      if (pageSize === 'all') {
+        buttonsEl.innerHTML = '';
+        return;
+      }
+
+      const numPerPage = parseInt(pageSize, 10);
+      const totalPages = Math.ceil(totalItems / numPerPage) || 1;
+
+      let html = '';
+      html += `
+        <button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled class="opacity-40 cursor-not-allowed"' : 'class="cursor-pointer hover:bg-slate-100"'} class="bg-white text-slate-600 px-2.5 py-1 rounded-lg border border-slate-300 transition">
+          <i class="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+      `;
+
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4);
+
+      for (let p = startPage; p <= endPage; p++) {
+        if (p === currentPage) {
+          html += `<button class="bg-blue-600 text-white font-bold px-3 py-1 rounded-lg border border-blue-600 transition shadow-sm">${p}</button>`;
+        } else {
+          html += `<button onclick="goToPage(${p})" class="bg-white text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-lg border border-slate-300 transition cursor-pointer">${p}</button>`;
+        }
+      }
+
+      html += `
+        <button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled class="opacity-40 cursor-not-allowed"' : 'class="cursor-pointer hover:bg-slate-100"'} class="bg-white text-slate-600 px-2.5 py-1 rounded-lg border border-slate-300 transition">
+          <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      `;
+
+      buttonsEl.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderTablePage();
+    }
+
+    function changePageSize(val) {
+      pageSize = val;
+      currentPage = 1;
+      renderTablePage();
+    }
+
+    // Modal Member View
+    function openModalByRawIndex(rawIndex) {
+      const row = rawDataRows[rawIndex];
+      if (row) openDetailModal(row);
+    }
+
+    function openDetailModal(row) {
+      currentSelectedMemberRow = row;
+
+      const fields = getSearchableFields(row);
+      const memberId = fields.memberId || '-';
+      const name = fields.name || 'ไม่ระบุชื่อ';
+      const cabinet = fields.cabinet || '-';
+      const shelf = fields.shelf || '-';
+      const status = fields.status || 'ปกติ';
+      const isResigned = status.includes('ลาออก');
+
+      document.getElementById('modalTitleName').innerText = name;
+      document.getElementById('modalSubtitleMemberId').innerHTML = `
+        <i class="fa-solid fa-barcode text-blue-300"></i> เลขที่สมาชิก: <strong class="text-white font-mono text-base">${escapeHtml(memberId)}</strong>
+      `;
+
+      const typeBadgeEl = document.getElementById('modalMemberTypeBadge');
+      if (typeBadgeEl) {
+        typeBadgeEl.className = 'text-xs px-2.5 py-0.5 rounded-full font-semibold bg-blue-500/30 text-blue-100 border border-blue-300/30';
+        typeBadgeEl.innerText = fields.affiliation || 'สมาชิกสหกรณ์';
+      }
+
+      const statusBadgeEl = document.getElementById('modalStatusBadge');
+      if (statusBadgeEl) {
+        if (isResigned) {
+          statusBadgeEl.innerHTML = `
+            <span class="bg-rose-500 text-white border border-rose-400 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm animate-pulse">
+              <i class="fa-solid fa-user-xmark"></i> ลาออก (พ้นสภาพ)
+            </span>
+          `;
+        } else {
+          statusBadgeEl.innerHTML = `
+            <span class="bg-emerald-500 text-white border border-emerald-400 text-xs px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-circle-check"></i> สถานะ: ปกติ
+            </span>
+          `;
+        }
+      }
+
+      // Configure Quick Toggle Button
+      const toggleTextEl = document.getElementById('btnQuickToggleStatusText');
+      const toggleBtnEl = document.getElementById('btnQuickToggleStatus');
+      if (toggleTextEl && toggleBtnEl) {
+        if (isResigned) {
+          toggleTextEl.innerText = 'เปลี่ยนเป็น "ปกติ"';
+          toggleBtnEl.className = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5';
+        } else {
+          toggleTextEl.innerText = 'เปลี่ยนเป็น "ลาออก"';
+          toggleBtnEl.className = 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5';
+        }
+      }
+
+      // Generate Modal Detail Cards with prominent Cabinet & Shelf card + Resignation warning if applicable
+      const modalBody = document.getElementById('modalBody');
+      modalBody.innerHTML = `
+        ${isResigned ? `
+        <div class="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl flex items-center gap-3 shadow-sm animate-in fade-in">
+          <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm font-prompt text-rose-900">สมาชิกรายนี้มีสถานะ "ลาออก" แล้ว</h4>
+            <p class="text-xs text-rose-700 mt-0.5">พ้นจากสภาพสมาชิกสหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด แต่ยังคงจัดเก็บประวัติและตำแหน่งแฟ้มเอกสารเดิมไว้</p>
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- Prominent Location Highlight Banner -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-200 flex flex-col sm:flex-row items-center justify-around gap-4 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 block font-medium">ตู้เอกสารเลขที่</span>
+              <strong class="text-2xl text-blue-700 font-bold font-mono">ตู้ ${escapeHtml(cabinet)}</strong>
+            </div>
+          </div>
+          <div class="hidden sm:block w-px h-12 bg-blue-200"></div>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+              <span class="text-xs text-slate-500 block font-medium">ชั้นวางเลขที่</span>
+              <strong class="text-2xl text-amber-700 font-bold font-mono">ชั้น ${escapeHtml(shelf)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-1">
+              <i class="fa-solid fa-barcode text-blue-600 text-xs"></i> เลขที่สมาชิก
+            </span>
+            <span class="font-mono font-bold text-blue-600 text-base block">
+              ${escapeHtml(fields.memberId || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-1">
+              <i class="fa-solid fa-user text-sky-600 text-xs"></i> ชื่อ - สกุล
+            </span>
+            <span class="font-bold text-slate-800 text-sm block">
+              ${escapeHtml(fields.name || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-1">
+              <i class="fa-solid fa-building-user text-indigo-600 text-xs"></i> สังกัด
+            </span>
+            <span class="font-semibold text-slate-800 text-sm block">
+              ${escapeHtml(fields.affiliation || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium mb-1">
+              <i class="fa-solid fa-location-dot text-rose-500 text-xs"></i> ที่อยู่
+            </span>
+            <span class="font-medium text-slate-700 text-xs block leading-relaxed">
+              ${escapeHtml(fields.address || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border border-blue-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-blue-600 font-medium mb-1">
+              <i class="fa-solid fa-box-archive text-blue-600 text-xs"></i> ตู้เลขที่
+            </span>
+            <span class="font-bold text-blue-700 text-base block font-mono">
+              ตู้ที่ ${escapeHtml(fields.cabinet || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border border-amber-200 shadow-sm">
+            <span class="flex items-center gap-1.5 text-[11px] text-amber-600 font-medium mb-1">
+              <i class="fa-solid fa-layer-group text-amber-600 text-xs"></i> ชั้นที่
+            </span>
+            <span class="font-bold text-amber-700 text-base block font-mono">
+              ชั้นที่ ${escapeHtml(fields.shelf || '-')}
+            </span>
+          </div>
+
+          <div class="p-3.5 bg-white rounded-2xl border ${isResigned ? 'border-rose-300 bg-rose-50/40' : 'border-emerald-300 bg-emerald-50/40'} shadow-sm sm:col-span-2">
+            <span class="flex items-center gap-1.5 text-[11px] ${isResigned ? 'text-rose-600' : 'text-emerald-700'} font-medium mb-1">
+              <i class="fa-solid fa-id-badge text-xs"></i> สถานะภาพสมาชิก
+            </span>
+            <span class="font-bold ${isResigned ? 'text-rose-700' : 'text-emerald-700'} text-sm block">
+              ${isResigned ? '🔴 ลาออก (พ้นสภาพสมาชิกแล้ว)' : '🟢 ปกติ (สมาชิกปัจจุบัน)'}
+            </span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    // Quick toggle status between ปกติ and ลาออก directly from Detail Modal
+    function quickToggleStatusFromDetailModal() {
+      if (!currentSelectedMemberRow) return;
+      const rawIndex = rawDataRows.indexOf(currentSelectedMemberRow);
+      if (rawIndex === -1) return;
+
+      const fields = getSearchableFields(currentSelectedMemberRow);
+      const isCurrentlyResigned = (fields.status || '').includes('ลาออก');
+      const newStatus = isCurrentlyResigned ? 'ปกติ' : 'ลาออก';
+
+      // Ensure status column exists in headers and row
+      if (colIndexMap.status === -1) {
+        appHeaders.push('สถานะภาพ');
+        colIndexMap.status = appHeaders.length - 1;
+      }
+
+      const rowToSave = [...currentSelectedMemberRow];
+      while (rowToSave.length <= colIndexMap.status) {
+        rowToSave.push('');
+      }
+      rowToSave[colIndexMap.status] = newStatus;
+      rawDataRows[rawIndex] = rowToSave;
+      currentSelectedMemberRow = rowToSave;
+
+      saveDataToLocalStorage();
+      showToast(`เปลี่ยนสถานะของ "${fields.name}" เป็น "${newStatus}" เรียบร้อยแล้ว`, newStatus === 'ปกติ' ? 'success' : 'info');
+      openDetailModal(rowToSave);
+      executeSearch();
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function copyMemberSummary() {
+      if (!currentSelectedMemberRow) return;
+      const fields = getSearchableFields(currentSelectedMemberRow);
+      const text = [
+        `เลขที่สมาชิก: ${fields.memberId}`,
+        `ชื่อ - สกุล: ${fields.name}`,
+        `ที่อยู่: ${fields.address}`,
+        `สังกัด: ${fields.affiliation}`,
+        `ตู้เลขที่: ${fields.cabinet}`,
+        `ชั้นที่: ${fields.shelf}`,
+        `สถานะ: ${fields.status || 'ปกติ'}`
+      ].join('\n');
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('คัดลอกตำแหน่งแฟ้มเอกสารไปยังคลิปบอร์ดแล้ว', 'success');
+      }).catch(() => {
+        showToast('ไม่สามารถคัดลอกข้อมูลได้', 'error');
+      });
+    }
+
+    function printSingleMember() {
+      if (!currentSelectedMemberRow) return;
+      window.print();
+    }
+
+    // ==========================================
+    // CRUD FUNCTIONS: เพิ่ม ลบ แก้ไข ข้อมูลแฟ้มสมาชิก
+    // ==========================================
+
+    // Open Add Member Modal
+    function openAddMemberModal() {
+      document.getElementById('formEditIndex').value = '-1';
+      document.getElementById('formModalTitle').innerText = 'เพิ่มข้อมูลแฟ้มสมาชิกใหม่';
+      document.getElementById('formModalSubtitle').innerText = 'ระบุเลขที่สมาชิก ชื่อ ที่อยู่ สังกัด ตู้เลขที่ ชั้นที่ และสถานะภาพ';
+      document.getElementById('formModalIcon').className = 'fa-solid fa-user-plus text-lg';
+      document.getElementById('formModalIconBox').className = 'w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white';
+
+      // Reset form fields
+      document.getElementById('memberForm').reset();
+
+      // Auto-generate next Member ID if possible
+      let nextId = '01264';
+      if (rawDataRows.length > 0 && colIndexMap.memberId !== -1) {
+        let maxNum = 0;
+        rawDataRows.forEach(r => {
+          const raw = String(r[colIndexMap.memberId] || '').trim().replace(/[^0-9]/g, '');
+          const num = parseInt(raw, 10);
+          if (!isNaN(num) && num > maxNum) maxNum = num;
+        });
+        if (maxNum > 0) {
+          nextId = String(maxNum + 1).padStart(5, '0');
+        }
+      }
+      document.getElementById('inputMemberId').value = nextId;
+      document.getElementById('inputCabinet').value = '6';
+      document.getElementById('inputShelf').value = '5';
+      const statusInput = document.getElementById('inputStatus');
+      if (statusInput) statusInput.value = 'ปกติ';
+
+      document.getElementById('memberFormModal').classList.remove('hidden');
+    }
+
+    // Open Edit Member Modal by Raw Index
+    function openEditMemberModalByRawIndex(rawIndex) {
+      const row = rawDataRows[rawIndex];
+      if (!row) return;
+
+      document.getElementById('formEditIndex').value = rawIndex;
+      document.getElementById('formModalTitle').innerText = 'แก้ไขข้อมูลแฟ้มสมาชิก';
+      document.getElementById('formModalSubtitle').innerText = 'เปลี่ยนแปลงรายละเอียดและตำแหน่งตู้/ชั้นในระบบ';
+      document.getElementById('formModalIcon').className = 'fa-solid fa-user-pen text-lg';
+      document.getElementById('formModalIconBox').className = 'w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-amber-300';
+
+      const fields = getSearchableFields(row);
+
+      document.getElementById('inputMemberId').value = fields.memberId;
+      document.getElementById('inputFullName').value = fields.name;
+      document.getElementById('inputAddress').value = fields.address;
+      document.getElementById('inputAffiliation').value = fields.affiliation;
+      document.getElementById('inputCabinet').value = fields.cabinet;
+      document.getElementById('inputShelf').value = fields.shelf;
+      const statusInput = document.getElementById('inputStatus');
+      if (statusInput) {
+        statusInput.value = (fields.status && fields.status.includes('ลาออก')) ? 'ลาออก' : (fields.status || 'ปกติ');
+      }
+
+      document.getElementById('memberFormModal').classList.remove('hidden');
+    }
+
+    // Open Edit from Detail Modal
+    function openEditFromDetailModal() {
+      if (!currentSelectedMemberRow) return;
+      const rawIndex = rawDataRows.indexOf(currentSelectedMemberRow);
+      if (rawIndex !== -1) {
+        closeModal();
+        openEditMemberModalByRawIndex(rawIndex);
+      }
+    }
+
+    // Close Member Form Modal
+    function closeMemberFormModal() {
+      document.getElementById('memberFormModal').classList.add('hidden');
+    }
+
+    // Submit Form (Add or Update)
+    function handleMemberFormSubmit(event) {
+      event.preventDefault();
+      const editIndex = parseInt(document.getElementById('formEditIndex').value, 10);
+
+      const memberId = document.getElementById('inputMemberId').value.trim();
+      const fullName = document.getElementById('inputFullName').value.trim();
+      const address = document.getElementById('inputAddress').value.trim();
+      const affiliation = document.getElementById('inputAffiliation').value.trim();
+      const cabinet = document.getElementById('inputCabinet').value.trim();
+      const shelf = document.getElementById('inputShelf').value.trim();
+      const status = document.getElementById('inputStatus') ? document.getElementById('inputStatus').value.trim() : 'ปกติ';
+
+      // Ensure headers exist
+      if (!appHeaders || appHeaders.length < 6) {
+        appHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+        detectColumnIndices(appHeaders);
+      }
+
+      // Ensure status column exists in headers
+      if (colIndexMap.status === -1) {
+        appHeaders.push('สถานะภาพ');
+        colIndexMap.status = appHeaders.length - 1;
+      }
+
+      if (editIndex >= 0 && rawDataRows[editIndex]) {
+        // Edit existing
+        const rowToSave = [...rawDataRows[editIndex]];
+        while (rowToSave.length < appHeaders.length) rowToSave.push('');
+
+        if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
+        if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
+        if (colIndexMap.address !== -1) rowToSave[colIndexMap.address] = address;
+        if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
+        if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
+        if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
+        if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
+
+        rawDataRows[editIndex] = rowToSave;
+        showToast(`แก้ไขข้อมูลสมาชิก "${fullName}" สำเร็จแล้ว`, 'success');
+      } else {
+        // Add new
+        const rowToSave = new Array(appHeaders.length).fill('');
+        if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
+        if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
+        if (colIndexMap.address !== -1) rowToSave[colIndexMap.address] = address;
+        if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
+        if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
+        if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
+        if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
+
+        rawDataRows.unshift(rowToSave);
+        showToast(`เพิ่มสมาชิกใหม่ "${fullName}" (สถานะ: ${status}) เรียบร้อยแล้ว`, 'success');
+      }
+
+      saveDataToLocalStorage();
+      buildFiltersList();
+      updateSummaryStats();
+      closeMemberFormModal();
+      executeSearch();
+    }
+
+    // Delete Operations
+    function confirmDeleteMemberByRawIndex(rawIndex) {
+      const row = rawDataRows[rawIndex];
+      if (!row) return;
+
+      const fields = getSearchableFields(row);
+      document.getElementById('deleteMemberName').innerText = fields.name || 'สมาชิก';
+      document.getElementById('deleteMemberId').innerText = fields.memberId || '-';
+      document.getElementById('deleteTargetIndex').value = rawIndex;
+      document.getElementById('deleteConfirmModal').classList.remove('hidden');
+    }
+
+    function deleteFromDetailModal() {
+      if (!currentSelectedMemberRow) return;
+      const rawIndex = rawDataRows.indexOf(currentSelectedMemberRow);
+      if (rawIndex !== -1) {
+        closeModal();
+        confirmDeleteMemberByRawIndex(rawIndex);
+      }
+    }
+
+    function closeDeleteConfirmModal() {
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+    }
+
+    function executeDeleteMember() {
+      const targetIdx = parseInt(document.getElementById('deleteTargetIndex').value, 10);
+      if (targetIdx >= 0 && targetIdx < rawDataRows.length) {
+        const deletedRow = rawDataRows[targetIdx];
+        const fields = getSearchableFields(deletedRow);
+
+        rawDataRows.splice(targetIdx, 1);
+        saveDataToLocalStorage();
+        buildFiltersList();
+        updateSummaryStats();
+        closeDeleteConfirmModal();
+        executeSearch();
+        showToast(`ลบข้อมูลสมาชิก "${fields.name}" เรียบร้อยแล้ว`, 'info');
+      }
+    }
+
+    // Export Current Table to Excel
+    function exportToExcel() {
+      if (!currentFilteredRows || currentFilteredRows.length === 0) {
+        showToast('ไม่มีข้อมูลสำหรับส่งออก', 'error');
+        return;
+      }
+
+      const exportData = [appHeaders, ...currentFilteredRows];
+      const ws = XLSX.utils.aoa_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'แฟ้มทะเบียนสมาชิก');
+
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `รายงานตำแหน่งแฟ้มทะเบียนสมาชิก_สอ_สสจ_สตูล_${dateStr}.xlsx`);
+      showToast('ส่งออกไฟล์ Excel เรียบร้อยแล้ว', 'success');
+    }
+
+    // ==========================================
+    // EXCEL IMPORT FUNCTIONS (นำเข้าไฟล์ Excel)
+    // ==========================================
+
+    let pendingImportData = null;
+
+    function openImportExcelModal() {
+      clearSelectedExcelFile();
+      document.getElementById('importExcelModal').classList.remove('hidden');
+    }
+
+    function closeImportExcelModal() {
+      clearSelectedExcelFile();
+      document.getElementById('importExcelModal').classList.add('hidden');
+    }
+
+    function handleExcelFileSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+          const processed = processSheetRows(rawJson);
+          if (!processed || !processed.rows || processed.rows.length === 0) {
+            showToast('ไม่พบข้อมูลในไฟล์ Excel หรือรูปแบบตารางไม่ถูกต้อง', 'error');
+            clearSelectedExcelFile();
+            return;
+          }
+
+          // Auto detect status or assign default ปกติ
+          let impHeaders = [...processed.headers];
+          let statusIdx = impHeaders.findIndex(h => {
+            const t = String(h).trim().toLowerCase();
+            return t.includes('สถานะ') || t.includes('สภาพ') || t.includes('status');
+          });
+
+          if (statusIdx === -1) {
+            impHeaders.push('สถานะภาพ');
+            statusIdx = impHeaders.length - 1;
+            processed.rows.forEach(r => {
+              while (r.length < impHeaders.length - 1) r.push('');
+              r.push('ปกติ');
+            });
+          } else {
+            // Fill empty status with ปกติ
+            processed.rows.forEach(r => {
+              if (!r[statusIdx] || String(r[statusIdx]).trim() === '') {
+                r[statusIdx] = 'ปกติ';
+              }
+            });
+          }
+
+          pendingImportData = {
+            headers: impHeaders,
+            rows: processed.rows,
+            fileName: file.name
+          };
+
+          // Update UI Preview
+          document.getElementById('excelFileName').innerText = file.name;
+          document.getElementById('excelFileStats').innerText = `พบข้อมูลที่ตรวจสอบได้ทั้งหมด ${processed.rows.length.toLocaleString('th-TH')} รายการ (${impHeaders.length} คอลัมน์)`;
+          document.getElementById('excelDropZone').classList.add('hidden');
+          document.getElementById('excelPreviewCard').classList.remove('hidden');
+          document.getElementById('btnConfirmImportExcel').removeAttribute('disabled');
+        } catch (err) {
+          console.error('Excel parse error:', err);
+          showToast('เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: ' + err.message, 'error');
+          clearSelectedExcelFile();
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function clearSelectedExcelFile() {
+      pendingImportData = null;
+      const fileInput = document.getElementById('excelFileInput');
+      if (fileInput) fileInput.value = '';
+
+      const dropZone = document.getElementById('excelDropZone');
+      if (dropZone) dropZone.classList.remove('hidden');
+
+      const previewCard = document.getElementById('excelPreviewCard');
+      if (previewCard) previewCard.classList.add('hidden');
+
+      const confirmBtn = document.getElementById('btnConfirmImportExcel');
+      if (confirmBtn) confirmBtn.setAttribute('disabled', 'true');
+    }
+
+    function confirmImportExcelData() {
+      if (!pendingImportData || !pendingImportData.rows || pendingImportData.rows.length === 0) {
+        showToast('กรุณาเลือกไฟล์ Excel ก่อนนำเข้า', 'error');
+        return;
+      }
+
+      const importMode = document.querySelector('input[name="importMode"]:checked')?.value || 'replace';
+      const newHeaders = pendingImportData.headers;
+      const newRows = pendingImportData.rows;
+
+      if (importMode === 'replace') {
+        appHeaders = newHeaders;
+        rawDataRows = newRows;
+      } else {
+        // Append mode: merge headers if needed
+        if (!appHeaders || appHeaders.length === 0) {
+          appHeaders = newHeaders;
+        }
+        rawDataRows = [...rawDataRows, ...newRows];
+      }
+
+      detectColumnIndices(appHeaders);
+      buildFiltersList();
+      updateSummaryStats();
+      saveDataToLocalStorage();
+
+      updateSyncStatusSuccess(`นำเข้าจากไฟล์ Excel เรียบร้อยแล้ว (${rawDataRows.length} รายการ)`, 'ไฟล์ Excel');
+      showToast(`นำเข้าข้อมูลจาก Excel สำเร็จแล้ว! (${newRows.length} รายการ)`, 'success');
+
+      closeImportExcelModal();
+      currentPage = 1;
+      executeSearch();
+    }
+
+    // Download Sample Excel Template
+    function downloadSampleExcelTemplate() {
+      const templateHeaders = ['เลขที่สมาชิก', 'ชื่อ - สกุล', 'ที่อยู่', 'สังกัด', 'ตู้เลขที่', 'ชั้นที่', 'สถานะภาพ'];
+      const templateData = [
+        templateHeaders,
+        ['01263', 'นางสุมาลี อรุณสวัสดิ์', '1250/197 ม.4 ต.คลองขุด อ.เมืองสตูล จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ปกติ'],
+        ['02795', 'น.ส.วิชุดา ชูระปา', '164 ม.5 ต.นิคมพัฒนา อ.กิ่งอำเภอมะนัง จ.สตูล', 'สอ.สสจ.สตูล จำกัด', '6', '5', 'ลาออก'],
+        ['03412', 'นายวิญญู จันทร์เนตร', '88/12 ถ.สฤษดิ์ภูมินารถ ต.พิมาน อ.เมืองสตูล จ.สตูล', 'โรงพยาบาลสตูล', '6', '4', 'ปกติ']
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(templateData);
+      // Auto width
+      ws['!cols'] = [
+        { wch: 15 }, // เลขที่สมาชิก
+        { wch: 28 }, // ชื่อ - สกุล
+        { wch: 45 }, // ที่อยู่
+        { wch: 25 }, // สังกัด
+        { wch: 12 }, // ตู้เลขที่
+        { wch: 12 }, // ชั้นที่
+        { wch: 15 }  // สถานะภาพ
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'แบบฟอร์มนำเข้า');
+      XLSX.writeFile(wb, 'ตัวอย่างไฟล์นำเข้า_ทะเบียนสมาชิก_ตู้ชั้น.xlsx');
+      showToast('ดาวน์โหลดไฟล์ตัวอย่างสำหรับนำเข้าเรียบร้อยแล้ว', 'info');
+    }
+
+    // Firebase Database Config Modal
+    function openConfigModal() {
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const fbInput = document.getElementById('firebaseUrlInput');
+      if (fbInput) fbInput.value = firebaseUrl;
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function saveDatabaseConfig() {
+      const fbInput = document.getElementById('firebaseUrlInput');
+      const fbVal = fbInput ? fbInput.value.trim() : '';
+
+      if (!fbVal) {
+        showToast('โปรดระบุ URL ของ Firebase Realtime Database', 'error');
+        return;
+      }
+
+      localStorage.setItem(STORAGE_DB_PROVIDER_KEY, 'firebase');
+      localStorage.setItem(STORAGE_FIREBASE_URL_KEY, fbVal);
+
+      closeConfigModal();
+      showToast('บันทึกการตั้งค่าแล้ว กำลังเชื่อมต่อ Firebase Realtime Database...', 'info');
+      fetchDatabaseData(true);
+    }
+
+    // Explicitly upload local data to Firebase
+    async function uploadCurrentDataToFirebase() {
+      if (!rawDataRows || rawDataRows.length === 0) {
+        showToast('ไม่มีข้อมูลสำหรับอัปโหลดขึ้น Firebase', 'error');
+        return;
+      }
+
+      const fbInput = document.getElementById('firebaseUrlInput');
+      const firebaseUrl = (fbInput && fbInput.value.trim()) || localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseMembersEndpoint(firebaseUrl);
+
+      showToast('กำลังส่งข้อมูลขึ้น Firebase...', 'info');
+
+      try {
+        const payload = {
+          headers: appHeaders,
+          rows: rawDataRows,
+          updatedAt: new Date().toISOString()
+        };
+
+        const res = await fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          localStorage.setItem(STORAGE_DB_PROVIDER_KEY, 'firebase');
+          localStorage.setItem(STORAGE_FIREBASE_URL_KEY, firebaseUrl);
+          showToast(`อัปโหลดข้อมูลสำเร็จ! ข้อมูล ${rawDataRows.length} รายการอยู่บน Firebase แล้ว`, 'success');
+          updateSyncStatusSuccess(`เชื่อมต่อ Firebase สำเร็จ (${rawDataRows.length} รายการ)`, 'Firebase Realtime');
+        } else {
+          showToast(`เกิดข้อผิดพลาดในการอัปโหลด: HTTP ${res.status}`, 'error');
+        }
+      } catch (err) {
+        showToast(`ไม่สามารถส่งข้อมูลขึ้น Firebase ได้: ${err.message}`, 'error');
+      }
+    }
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check cache first for instant UX
+      try {
+        const cached = localStorage.getItem(STORAGE_CACHE_KEY);
+        if (cached) {
+          const parsedCache = JSON.parse(cached);
+          if (parsedCache && parsedCache.rows && parsedCache.rows.length > 0) {
+            appHeaders = parsedCache.headers || [];
+            rawDataRows = parsedCache.rows || [];
+            detectColumnIndices(appHeaders);
+            buildFiltersList();
+            updateSummaryStats();
+            updateSyncStatusSuccess('โหลดข้อมูลจากแคชล่าสุด (พร้อมซิงค์สด)', 'ข้อมูลแคช');
+          }
+        }
+      } catch (e) {}
+
+      // Fetch live data from configured database
+      fetchDatabaseData();
+    });
+  </script>
+</body>
+</html>
