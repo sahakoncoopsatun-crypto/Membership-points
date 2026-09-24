@@ -126,29 +126,58 @@
           <!-- Actions Toolbar -->
           <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
             <!-- Add Member Button -->
-            <button onclick="openAddMemberModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-blue-400/40 cursor-pointer">
+            <button id="btnAddMember" onclick="openAddMemberModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-emerald-500 hover:to-teal-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-blue-400/40 cursor-pointer">
               <i class="fa-solid fa-user-plus mr-1.5 text-amber-300"></i>
               <span>เพิ่มสมาชิกใหม่</span>
             </button>
 
             <!-- Import Excel Button -->
-            <button onclick="openImportExcelModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-emerald-400/40 cursor-pointer" title="นำเข้าข้อมูลสมาชิกจากไฟล์ Excel (.xlsx, .xls, .csv)">
+            <button id="btnImportExcel" onclick="openImportExcelModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-lg border border-emerald-400/40 cursor-pointer" title="นำเข้าข้อมูลสมาชิกจากไฟล์ Excel (.xlsx, .xls, .csv)">
               <i class="fa-solid fa-file-excel mr-1.5 text-emerald-200"></i>
               <span>นำเข้า Excel</span>
             </button>
 
-
-
             <!-- Sync Button -->
-            <button onclick="fetchDatabaseData(true)" class="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition duration-200 flex items-center shadow-md border border-blue-400/30 cursor-pointer">
-              <i id="syncIcon" class="fa-solid fa-rotate mr-2"></i>
-              <span>รีเฟรชข้อมูล</span>
+            <button onclick="fetchDatabaseData(true)" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition duration-200 flex items-center shadow-md border border-blue-400/30 cursor-pointer" title="รีเฟรชข้อมูลจากฐานข้อมูล">
+              <i id="syncIcon" class="fa-solid fa-rotate mr-1.5"></i>
+              <span>รีเฟรช</span>
             </button>
 
-            <!-- Database Config Modal Button -->
-            <button onclick="openConfigModal()" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 p-2 rounded-xl transition duration-200 border border-amber-300/30 shadow cursor-pointer" title="ตั้งค่าฐานข้อมูล Firebase Realtime Database">
+            <!-- Audit Log Button (Admin & Editor) -->
+            <button id="btnAuditLog" onclick="openAuditLogModal()" class="bg-purple-600/90 hover:bg-purple-500 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-md border border-purple-400/30 cursor-pointer" title="ประวัติการแก้ไขและเปลี่ยนแปลงข้อมูลย้อนหลัง">
+              <i class="fa-solid fa-clock-rotate-left mr-1.5 text-purple-200"></i>
+              <span>ประวัติแก้ไข</span>
+            </button>
+
+            <!-- User Management Button (Admin only) -->
+            <button id="btnUserManagement" onclick="openUserManagementModal()" class="bg-indigo-600/90 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition duration-200 flex items-center shadow-md border border-indigo-400/30 cursor-pointer" title="จัดการผู้ใช้งานและสิทธิ์">
+              <i class="fa-solid fa-users-gear mr-1.5 text-indigo-200"></i>
+              <span>ผู้ใช้งาน</span>
+            </button>
+
+            <!-- Database Config Modal Button (Admin only) -->
+            <button id="btnConfigModal" onclick="openConfigModal()" class="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 p-2 rounded-xl transition duration-200 border border-amber-300/30 shadow cursor-pointer" title="ตั้งค่าฐานข้อมูล Firebase Realtime Database">
               <i class="fa-solid fa-database text-sm"></i>
             </button>
+
+            <!-- User Profile Bar & Logout -->
+            <div id="userProfileBar" class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 text-xs shadow-inner">
+              <div class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-200 text-slate-900 flex items-center justify-center font-bold text-xs shadow">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <div class="leading-tight text-left">
+                <div class="font-bold text-white text-xs flex items-center gap-1.5">
+                  <span id="headerUserDisplayName">ผู้ใช้งาน</span>
+                  <span id="headerUserRoleBadge" class="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-amber-400 text-slate-900">Admin</span>
+                </div>
+                <div class="text-[10px] text-blue-200 font-mono" id="headerUserSubtext">@admin</div>
+              </div>
+              <div class="w-px h-5 bg-white/20 mx-1"></div>
+              <button onclick="logout()" class="text-rose-200 hover:text-white hover:bg-rose-600/80 px-2 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold" title="ออกจากระบบ (Logout)">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="hidden sm:inline">ออก</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -410,10 +439,13 @@
           <button id="btnQuickToggleStatus" onclick="quickToggleStatusFromDetailModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-arrows-rotate"></i> <span id="btnQuickToggleStatusText">เปลี่ยนสถานะ</span>
           </button>
-          <button onclick="openEditFromDetailModal()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
+          <button id="btnEditFromDetailModal" onclick="openEditFromDetailModal()" class="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลนี้
           </button>
-          <button onclick="deleteFromDetailModal()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
+          <button id="btnAuditForCurrentMember" onclick="openAuditForCurrentMember()" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5" title="ดูประวัติการแก้ไขของสมาชิกรายนี้">
+            <i class="fa-solid fa-clock-rotate-left"></i> ประวัติแก้ไข
+          </button>
+          <button id="btnDeleteFromDetailModal" onclick="deleteFromDetailModal()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
             <i class="fa-solid fa-trash-can"></i> ลบสมาชิก
           </button>
         </div>
@@ -725,6 +757,373 @@
         </div>
       </div>
     </div>
+  <!-- ========================================== -->
+  <!-- 1. LOGIN MODAL (Gated Authentication Screen) -->
+  <!-- ========================================== -->
+  <div id="loginModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-950 text-white p-7 text-center relative">
+        <div class="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-xl mx-auto mb-3 text-3xl text-sky-300">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="text-xl font-bold font-prompt text-white">เข้าสู่ระบบการทำงาน</h3>
+        <p class="text-xs text-blue-200 mt-1">ระบบสืบค้นและจัดการแฟ้มทะเบียนสมาชิก<br>สหกรณ์ออมทรัพย์สาธารณสุขสตูล จำกัด</p>
+      </div>
+
+      <!-- Form Body -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="p-6 sm:p-7 space-y-4">
+        <!-- Error Alert Box -->
+        <div id="loginErrorBox" class="hidden p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs flex items-center gap-2">
+          <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-rose-500"></i>
+          <span id="loginErrorText">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</span>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1.5 text-xs">
+            <i class="fa-solid fa-user text-blue-600 mr-1"></i> ชื่อผู้ใช้งาน (Username)
+          </label>
+          <input type="text" id="loginUsername" required placeholder="เช่น admin, staff หรือ viewer" autocomplete="username"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1.5 text-xs flex items-center justify-between">
+            <span><i class="fa-solid fa-key text-blue-600 mr-1"></i> รหัสผ่าน (Password)</span>
+            <button type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIconLogin')" class="text-slate-400 hover:text-blue-600 cursor-pointer">
+              <i id="eyeIconLogin" class="fa-solid fa-eye text-xs"></i>
+            </button>
+          </label>
+          <div class="relative">
+            <input type="password" id="loginPassword" required placeholder="กรอกรหัสผ่านของคุณ" autocomplete="current-password"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition pr-10">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs pt-1">
+          <label class="flex items-center gap-2 text-slate-600 cursor-pointer">
+            <input type="checkbox" id="loginRemember" checked class="rounded text-blue-600 focus:ring-blue-500">
+            <span>จดจำการเข้าสู่ระบบในเครื่องนี้</span>
+          </label>
+        </div>
+
+        <button type="submit" id="btnLoginSubmit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition duration-200 cursor-pointer text-sm flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>เข้าสู่ระบบ</span>
+        </button>
+
+        <!-- Account hint -->
+        <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1 bg-slate-50/80 p-3 rounded-xl border">
+          <div class="font-semibold text-slate-700 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-blue-500"></i> บัญชีเริ่มต้นสำหรับเข้าสู่ระบบ:
+          </div>
+          <div class="grid grid-cols-3 gap-1 pt-1 text-[10px]">
+            <div class="bg-white p-1.5 rounded border border-slate-200">
+              <strong class="text-amber-700 block">👑 Admin</strong>
+              <span>admin / admin</span>
+            </div>
+            <div class="bg-white p-1.5 rounded border border-slate-200">
+              <strong class="text-sky-700 block">✍️ Staff</strong>
+              <span>staff / staff1234</span>
+            </div>
+            <div class="bg-white p-1.5 rounded border border-slate-200">
+              <strong class="text-slate-700 block">👁️ Viewer</strong>
+              <span>viewer / viewer1234</span>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. FORCE CHANGE PASSWORD MODAL (First Login) -->
+  <!-- ========================================== -->
+  <div id="forceChangePasswordModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <!-- Header Banner -->
+      <div class="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white p-6 text-center relative">
+        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl mx-auto mb-2.5 text-2xl text-amber-200">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h3 class="text-lg font-bold font-prompt text-white">กรุณาตั้งรหัสผ่านใหม่</h3>
+        <p class="text-xs text-amber-100 mt-0.5">เป็นการเข้าใช้งานครั้งแรก เพื่อความปลอดภัย กรุณากำหนดรหัสผ่านใหม่ส่วนตัวของคุณ</p>
+      </div>
+
+      <!-- Form Body -->
+      <form id="forceChangePasswordForm" onsubmit="handleForceChangePasswordSubmit(event)" class="p-6 space-y-4 text-xs sm:text-sm">
+        <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl flex items-center gap-2.5 text-xs text-amber-900">
+          <i class="fa-solid fa-user-lock text-base text-amber-600"></i>
+          <div>
+            <span>ผู้ใช้งาน: </span><strong id="forceUserDisplay" class="font-mono text-amber-950"></strong>
+          </div>
+        </div>
+
+        <div id="forceErrorBox" class="hidden p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs flex items-center gap-2">
+          <i class="fa-solid fa-circle-exclamation text-base shrink-0 text-rose-500"></i>
+          <span id="forceErrorText">รหัสผ่านไม่ตรงกัน หรือสั้นเกินไป</span>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1 text-xs">
+            รหัสผ่านใหม่ (อย่างน้อย 4 ตัวอักษร) <span class="text-rose-500">*</span>
+          </label>
+          <input type="password" id="forceNewPassword" required minlength="4" placeholder="กรอกรหัสผ่านใหม่ที่คุณต้องการ"
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1 text-xs">
+            ยืนยันรหัสผ่านใหม่อีกครั้ง <span class="text-rose-500">*</span>
+          </label>
+          <input type="password" id="forceConfirmPassword" required minlength="4" placeholder="กรอกรหัสผ่านใหม่อีกครั้งให้ตรงกัน"
+            class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3 rounded-xl shadow transition duration-200 cursor-pointer text-sm flex items-center justify-center gap-2 mt-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>บันทึกรหัสผ่านใหม่และเข้าสู่ระบบ</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. USER MANAGEMENT MODAL (Admin Only) -->
+  <!-- ========================================== -->
+  <div id="userManagementModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-indigo-900 to-blue-900 text-white p-5 relative border-b border-indigo-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-white">
+            <i class="fa-solid fa-users-gear text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold font-prompt text-white">จัดการผู้ใช้งานและกำหนดสิทธิ์ (User Management)</h3>
+            <p class="text-xs text-indigo-200">สร้างผู้ใช้งานใหม่ กำหนดสิทธิ์ และรีเซ็ตรหัสผ่าน</p>
+          </div>
+        </div>
+        <button onclick="closeUserManagementModal()" class="text-white/80 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-grow bg-slate-50 text-xs sm:text-sm">
+        <!-- Add New User Card -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 font-prompt">
+            <i class="fa-solid fa-user-plus text-indigo-600"></i> เพิ่มผู้ใช้งานใหม่
+          </h4>
+          <form id="addNewUserForm" onsubmit="handleAddNewUserSubmit(event)" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-medium text-slate-700 mb-1 text-xs">ชื่อผู้ใช้ (Username) <span class="text-rose-500">*</span></label>
+                <input type="text" id="newUsername" required placeholder="เช่น user01 (ภาษาอังกฤษ/ตัวเลข)"
+                  class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block font-medium text-slate-700 mb-1 text-xs">ชื่อ - สกุล / หน่วยงาน <span class="text-rose-500">*</span></label>
+                <input type="text" id="newFullName" required placeholder="เช่น นางสาวสมหญิง จริงใจ"
+                  class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-medium text-slate-700 mb-1 text-xs">ระดับสิทธิ์ (Role) <span class="text-rose-500">*</span></label>
+                <select id="newRole" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                  <option value="viewer">👁️ ผู้เข้าดูข้อมูล (Viewer) - ค้นหา/ดูได้อย่างเดียว</option>
+                  <option value="editor">✍️ เจ้าหน้าที่ (Editor) - ค้นหา, เพิ่ม, แก้ไขข้อมูลได้</option>
+                  <option value="admin">👑 ผู้ดูแลระบบ (Admin) - จัดการได้ทุกฟังก์ชัน</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-medium text-slate-700 mb-1 text-xs">รหัสผ่านเริ่มต้น (Temporary Password) <span class="text-rose-500">*</span></label>
+                <input type="text" id="newPassword" required placeholder="เช่น 1234 หรือ pass123"
+                  class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                <input type="checkbox" id="newMustChangePassword" checked class="rounded text-indigo-600 focus:ring-indigo-500">
+                <span>บังคับให้ผู้ใช้เปลี่ยนรหัสผ่านเมื่อเข้าใช้งานครั้งแรก (แนะนำ)</span>
+              </label>
+              <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-xs transition cursor-pointer shadow flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> เพิ่มผู้ใช้
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Users Table Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+            <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2 font-prompt">
+              <i class="fa-solid fa-users text-slate-600"></i> รายชื่อผู้ใช้งานในระบบ (<span id="userCountText">0</span>)
+            </h4>
+            <span class="text-xs text-slate-500">ข้อมูลซิงค์กับ Firebase อัตโนมัติ</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200 font-semibold">
+                <tr>
+                  <th class="p-3">ชื่อผู้ใช้</th>
+                  <th class="p-3">ชื่อ - สกุล</th>
+                  <th class="p-3 text-center">สิทธิ์การใช้งาน</th>
+                  <th class="p-3 text-center">สถานะรหัสผ่าน</th>
+                  <th class="p-3 text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody" class="divide-y divide-slate-100">
+                <!-- User rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end">
+        <button onclick="closeUserManagementModal()" class="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-medium transition border border-slate-300 cursor-pointer">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. AUDIT LOG MODAL (ประวัติการแก้ไขย้อนหลัง) -->
+  <!-- ========================================== -->
+  <div id="auditLogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-5 relative border-b border-purple-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center text-purple-200">
+            <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold font-prompt text-white">ประวัติการแก้ไขและเปลี่ยนแปลงข้อมูลย้อนหลัง (Audit Log)</h3>
+            <p class="text-xs text-purple-200">สืบค้นและตรวจสอบประวัติการเพิ่ม แก้ไข ลบ และเปลี่ยนสถานะข้อมูลสมาชิก</p>
+          </div>
+        </div>
+        <button onclick="closeAuditLogModal()" class="text-white/80 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Filter Controls Bar -->
+      <div class="p-4 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex flex-wrap items-center gap-2 flex-grow">
+          <div class="relative flex-grow max-w-xs">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <input type="text" id="auditSearchInput" oninput="renderAuditLogTable()" placeholder="ค้นหาตามเลขที่, ชื่อสมาชิก, ผู้แก้ไข..."
+              class="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-300 rounded-xl text-slate-800 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500">
+          </div>
+
+          <select id="auditActionSelect" onchange="renderAuditLogTable()" class="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-700 font-medium focus:outline-none focus:border-purple-500 cursor-pointer">
+            <option value="">-- กิจกรรมทั้งหมด --</option>
+            <option value="ADD">🟢 เพิ่มสมาชิกใหม่</option>
+            <option value="EDIT">🟠 แก้ไขข้อมูล</option>
+            <option value="STATUS_CHANGE">🟣 เปลี่ยนสถานะภาพ</option>
+            <option value="DELETE">🔴 ลบข้อมูลสมาชิก</option>
+            <option value="IMPORT">🔵 นำเข้าไฟล์ Excel</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="clearAuditFilter()" class="text-xs text-slate-500 hover:text-purple-600 cursor-pointer flex items-center gap-1">
+            <i class="fa-solid fa-rotate-left"></i> ล้างตัวกรอง
+          </button>
+          <span class="text-slate-300">|</span>
+          <span id="auditCountBadge" class="text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-lg">0 รายการ</span>
+        </div>
+      </div>
+
+      <!-- Modal Body (Logs Table) -->
+      <div class="p-4 overflow-y-auto flex-grow bg-slate-50 text-xs">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 uppercase border-b border-slate-200 font-semibold">
+                <tr>
+                  <th class="p-3 w-36">วันเวลา</th>
+                  <th class="p-3 w-32">ผู้ดำเนินการ</th>
+                  <th class="p-3 w-28 text-center">กิจกรรม</th>
+                  <th class="p-3 w-40">ข้อมูลสมาชิก</th>
+                  <th class="p-3">รายละเอียดการเปลี่ยนแปลง</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody" class="divide-y divide-slate-100">
+                <!-- Log rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 flex items-center gap-1">
+          <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i> ประวัติซิงค์อัตโนมัติไปยัง Firebase Realtime Database
+        </span>
+        <button onclick="closeAuditLogModal()" class="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-xs font-medium transition border border-slate-300 cursor-pointer">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  <!-- ========================================== -->
+  <!-- 5. CONFIRM EDIT / CHANGE POP-UP MODAL -->
+  <!-- ========================================== -->
+  <div id="confirmEditModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <div class="flex items-center gap-3.5 mb-4 border-b border-slate-100 pb-3">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl border border-amber-200 shrink-0 shadow-sm">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-800 font-prompt">ยืนยันการเปลี่ยนแปลงข้อมูล</h3>
+          <p class="text-xs text-slate-500">โปรดตรวจสอบรายละเอียดข้อมูลที่มีการแก้ไขก่อนบันทึกเข้าระบบ</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 mb-5">
+        <div class="bg-blue-50/70 p-3 rounded-xl border border-blue-200 text-xs">
+          <span class="text-slate-500">เลขที่สมาชิก: </span><strong id="confirmEditMemberId" class="font-mono text-blue-700"></strong>
+          <span class="mx-2 text-slate-300">|</span>
+          <span class="text-slate-500">ชื่อ - สกุล: </span><strong id="confirmEditMemberName" class="text-slate-800"></strong>
+        </div>
+
+        <div>
+          <span class="text-xs font-semibold text-slate-700 block mb-1.5 flex items-center gap-1">
+            <i class="fa-solid fa-code-compare text-amber-600"></i> รายการที่มีการเปลี่ยนแปลง:
+          </span>
+          <div id="confirmEditDiffList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs">
+            <!-- Diff items injected by JS -->
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-purple-600 text-xs"></i>
+          <span>การเปลี่ยนแปลงนี้จะถูกบันทึกใน <strong>ประวัติการแก้ไขย้อนหลัง (Audit Log)</strong> โดยอัตโนมัติ</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+        <button onclick="closeConfirmEditModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-medium transition cursor-pointer border border-slate-300">
+          ยกเลิก
+        </button>
+        <button onclick="executeConfirmEditSubmit()" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition shadow-md cursor-pointer flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i>
+          <span>ยืนยันบันทึกข้อมูล</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -741,6 +1140,16 @@
     const STORAGE_FIREBASE_URL_KEY = 'stn_coop_firebase_url_v1';
     const STORAGE_DB_PROVIDER_KEY = 'stn_coop_db_provider_v1';
     const STORAGE_CACHE_KEY = 'stn_coop_member_cache_data_v2';
+    const STORAGE_USERS_KEY = 'stn_coop_users_data_v2';
+    const STORAGE_AUTH_SESSION_KEY = 'stn_coop_auth_session_v2';
+    const STORAGE_AUDIT_LOGS_KEY = 'stn_coop_audit_logs_v2';
+
+    // Default User Accounts (used if not yet initialized in Firebase or LocalStorage)
+    const DEFAULT_USERS = [
+      { username: 'admin', fullName: 'ผู้ดูแลระบบสูงสุด', role: 'admin', password: 'admin', mustChangePassword: false, createdAt: '2026-09-01T00:00:00.000Z' },
+      { username: 'staff', fullName: 'เจ้าหน้าที่ทะเบียน', role: 'editor', password: 'staff1234', mustChangePassword: true, createdAt: '2026-09-01T00:00:00.000Z' },
+      { username: 'viewer', fullName: 'ผู้เข้าดูข้อมูลทั่วไป', role: 'viewer', password: 'viewer1234', mustChangePassword: true, createdAt: '2026-09-01T00:00:00.000Z' }
+    ];
 
     // Default Headers Schema for Registration Filing (เลขที่สมาชิก, ชื่อ - สกุล, สังกัด, ห้อง, ตู้เลขที่, ชั้นที่, สถานะภาพ)
     const DEFAULT_HEADERS = [
@@ -754,6 +1163,12 @@
     let currentPage = 1;
     let pageSize = 25;
     let currentSelectedMemberRow = null;
+
+    // Authentication & Audit State
+    let appUsers = [];
+    let currentUser = null; // { username, fullName, role, mustChangePassword }
+    let auditLogs = [];
+    let pendingForceChangeUser = null;
 
     // Column Indices (dynamically mapped from headers)
     let colIndexMap = {
@@ -995,7 +1410,7 @@
       return fields;
     }
 
-    // Helper: Normalize Firebase RTDB URL to JSON endpoint
+    // Helper: Normalize Firebase RTDB URL to JSON endpoints
     function getFirebaseMembersEndpoint(baseUrl) {
       if (!baseUrl) baseUrl = DEFAULT_FIREBASE_URL;
       let clean = baseUrl.trim();
@@ -1003,9 +1418,39 @@
       return clean + 'members.json';
     }
 
+    function getFirebaseUsersEndpoint(baseUrl) {
+      if (!baseUrl) baseUrl = DEFAULT_FIREBASE_URL;
+      let clean = baseUrl.trim();
+      if (!clean.endsWith('/')) clean += '/';
+      return clean + 'users.json';
+    }
+
+    function getFirebaseAuditEndpoint(baseUrl) {
+      if (!baseUrl) baseUrl = DEFAULT_FIREBASE_URL;
+      let clean = baseUrl.trim();
+      if (!clean.endsWith('/')) clean += '/';
+      return clean + 'audit_logs.json';
+    }
+
+    // Helper: Sort records by Member ID ascending (Numeric / Natural sort)
+    function sortDatasetByMemberId(rows) {
+      if (!Array.isArray(rows) || colIndexMap.memberId === -1) return rows;
+      return rows.sort((a, b) => {
+        const valA = String(a[colIndexMap.memberId] || '').trim();
+        const valB = String(b[colIndexMap.memberId] || '').trim();
+        const numA = parseInt(valA.replace(/\D/g, ''), 10);
+        const numB = parseInt(valB.replace(/\D/g, ''), 10);
+        if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+          return numA - numB;
+        }
+        return valA.localeCompare(valB, 'th', { numeric: true });
+      });
+    }
+
     // Save Data to Local Storage Cache & Sync to Firebase if connected
     function saveDataToLocalStorage(syncToRemote = true) {
       try {
+        sortDatasetByMemberId(rawDataRows);
         localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify({
           headers: appHeaders,
           rows: rawDataRows,
@@ -1125,6 +1570,10 @@
       const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
       const endpoint = getFirebaseMembersEndpoint(firebaseUrl);
 
+      // Concurrently fetch users and audit logs from Firebase
+      fetchUsersFromFirebase();
+      fetchAuditLogsFromFirebase();
+
       try {
         const response = await fetch(endpoint, { cache: 'no-cache' });
         if (response.ok) {
@@ -1134,6 +1583,7 @@
             const normalized = normalizeMemberDataset(data.headers, data.rows);
             appHeaders = normalized.headers;
             rawDataRows = normalized.rows;
+            sortDatasetByMemberId(rawDataRows);
             detectColumnIndices(appHeaders);
             buildFiltersList();
             updateSummaryStats();
@@ -1565,12 +2015,16 @@
                 <button onclick="event.stopPropagation(); openModalByRawIndex(${rawIndex})" class="text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 px-2.5 py-1 rounded-lg text-xs transition border border-blue-200 hover:border-blue-600 shadow-sm cursor-pointer font-medium" title="ดูรายละเอียดตำแหน่งแฟ้ม">
                   <i class="fa-solid fa-eye mr-1"></i> ดู
                 </button>
+                ${(currentUser && (currentUser.role === 'admin' || currentUser.role === 'editor')) ? `
                 <button onclick="event.stopPropagation(); openEditMemberModalByRawIndex(${rawIndex})" class="text-amber-700 hover:text-white bg-amber-50 hover:bg-amber-500 px-2.5 py-1 rounded-lg text-xs transition border border-amber-200 hover:border-amber-500 shadow-sm cursor-pointer font-medium" title="แก้ไขข้อมูล">
                   <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไข
                 </button>
+                ` : ''}
+                ${(currentUser && currentUser.role === 'admin') ? `
                 <button onclick="event.stopPropagation(); confirmDeleteMemberByRawIndex(${rawIndex})" class="text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-600 px-2 py-1 rounded-lg text-xs transition border border-rose-200 hover:border-rose-600 shadow-sm cursor-pointer" title="ลบข้อมูล">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
+                ` : ''}
               </div>
             </td>
           </tr>
@@ -1825,6 +2279,15 @@
       const isCurrentlyResigned = (fields.status || '').includes('ลาออก');
       const newStatus = isCurrentlyResigned ? 'ปกติ' : 'ลาออก';
 
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการเปลี่ยนสถานะสมาชิก (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        return;
+      }
+
+      if (!confirm(`ยืนยันการเปลี่ยนแปลงสถานะภาพของ "${fields.name}" จาก "${fields.status || 'ปกติ'}" เป็น "${newStatus}" ใช่หรือไม่?`)) {
+        return;
+      }
+
       // Ensure status column exists in headers and row
       if (colIndexMap.status === -1) {
         appHeaders.push('สถานะภาพ');
@@ -1838,6 +2301,8 @@
       rowToSave[colIndexMap.status] = newStatus;
       rawDataRows[rawIndex] = rowToSave;
       currentSelectedMemberRow = rowToSave;
+
+      logAuditEvent('STATUS_CHANGE', fields.memberId, fields.name, `เปลี่ยนสถานะภาพจาก '${fields.status || 'ปกติ'}' เป็น '${newStatus}'`);
 
       saveDataToLocalStorage();
       showToast(`เปลี่ยนสถานะของ "${fields.name}" เป็น "${newStatus}" เรียบร้อยแล้ว`, newStatus === 'ปกติ' ? 'success' : 'info');
@@ -1880,6 +2345,11 @@
 
     // Open Add Member Modal
     function openAddMemberModal() {
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการเพิ่มสมาชิกใหม่ (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        return;
+      }
+
       document.getElementById('formEditIndex').value = '-1';
       document.getElementById('formModalTitle').innerText = 'เพิ่มข้อมูลแฟ้มสมาชิกใหม่';
       document.getElementById('formModalSubtitle').innerText = 'ระบุเลขที่สมาชิก ชื่อ สังกัด ห้อง ตู้เลขที่ ชั้นที่ และสถานะภาพ';
@@ -1914,6 +2384,11 @@
 
     // Open Edit Member Modal by Raw Index
     function openEditMemberModalByRawIndex(rawIndex) {
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการแก้ไขข้อมูลสมาชิก (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        return;
+      }
+
       const row = rawDataRows[rawIndex];
       if (!row) return;
 
@@ -1957,6 +2432,11 @@
     // Submit Form (Add or Update)
     function handleMemberFormSubmit(event) {
       event.preventDefault();
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการบันทึกหรือแก้ไขข้อมูล (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        return;
+      }
+
       const editIndex = parseInt(document.getElementById('formEditIndex').value, 10);
 
       const memberId = document.getElementById('inputMemberId').value.trim();
@@ -1986,20 +2466,39 @@
       }
 
       if (editIndex >= 0 && rawDataRows[editIndex]) {
-        // Edit existing
-        const rowToSave = [...rawDataRows[editIndex]];
-        while (rowToSave.length < appHeaders.length) rowToSave.push('');
+        // Edit existing -> Check differences and show Confirmation Pop-Up Modal
+        const oldRow = rawDataRows[editIndex];
+        const oldFields = getSearchableFields(oldRow);
 
-        if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
-        if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
-        if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
-        if (colIndexMap.room !== -1) rowToSave[colIndexMap.room] = room;
-        if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
-        if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
-        if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
+        const diffs = [];
+        if (oldFields.memberId !== memberId) diffs.push({ label: 'เลขที่สมาชิก', oldVal: oldFields.memberId, newVal: memberId });
+        if (oldFields.name !== fullName) diffs.push({ label: 'ชื่อ - สกุล', oldVal: oldFields.name, newVal: fullName });
+        if (oldFields.affiliation !== affiliation) diffs.push({ label: 'สังกัด', oldVal: oldFields.affiliation, newVal: affiliation });
+        if (oldFields.room !== room) diffs.push({ label: 'ห้อง', oldVal: oldFields.room, newVal: room });
+        if (oldFields.cabinet !== cabinet) diffs.push({ label: 'ตู้เลขที่', oldVal: oldFields.cabinet, newVal: cabinet });
+        if (oldFields.shelf !== shelf) diffs.push({ label: 'ชั้นที่', oldVal: oldFields.shelf, newVal: shelf });
+        if (oldFields.status !== status) diffs.push({ label: 'สถานะภาพ', oldVal: oldFields.status, newVal: status });
 
-        rawDataRows[editIndex] = rowToSave;
-        showToast(`แก้ไขข้อมูลสมาชิก "${fullName}" สำเร็จแล้ว`, 'success');
+        if (diffs.length === 0) {
+          showToast('ไม่มีข้อมูลใดเปลี่ยนแปลง', 'info');
+          closeMemberFormModal();
+          return;
+        }
+
+        // Open Confirm Edit Pop-Up Modal
+        openConfirmEditModal({
+          editIndex,
+          memberId,
+          fullName,
+          affiliation,
+          room,
+          cabinet,
+          shelf,
+          status,
+          diffs,
+          oldRow
+        });
+        return;
       } else {
         // Add new
         const rowToSave = new Array(appHeaders.length).fill('');
@@ -2012,19 +2511,26 @@
         if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
 
         rawDataRows.unshift(rowToSave);
+        sortDatasetByMemberId(rawDataRows);
+
+        logAuditEvent('ADD', memberId, fullName, `เพิ่มสมาชิกใหม่ (สังกัด: ${affiliation || '-'}, ห้อง: ${room || '-'}, ตู้: ${cabinet}, ชั้น: ${shelf}, สถานะ: ${status})`);
+
+        saveDataToLocalStorage();
+        buildFiltersList();
+        updateSummaryStats();
+        closeMemberFormModal();
+        executeSearch();
         showToast(`เพิ่มสมาชิกใหม่ "${fullName}" (สถานะ: ${status}) เรียบร้อยแล้ว`, 'success');
       }
-
-      saveDataToLocalStorage();
-      buildFiltersList();
-      updateSummaryStats();
-      closeMemberFormModal();
-      executeSearch();
     }
-
 
     // Delete Operations
     function confirmDeleteMemberByRawIndex(rawIndex) {
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถลบข้อมูลสมาชิกได้', 'error');
+        return;
+      }
+
       const row = rawDataRows[rawIndex];
       if (!row) return;
 
@@ -2049,12 +2555,22 @@
     }
 
     function executeDeleteMember() {
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถลบข้อมูลสมาชิกได้', 'error');
+        closeDeleteConfirmModal();
+        return;
+      }
+
       const targetIdx = parseInt(document.getElementById('deleteTargetIndex').value, 10);
       if (targetIdx >= 0 && targetIdx < rawDataRows.length) {
         const deletedRow = rawDataRows[targetIdx];
         const fields = getSearchableFields(deletedRow);
 
         rawDataRows.splice(targetIdx, 1);
+        sortDatasetByMemberId(rawDataRows);
+
+        logAuditEvent('DELETE', fields.memberId, fields.name, `ลบข้อมูลสมาชิก (สังกัด: ${fields.affiliation || '-'}, ห้อง: ${fields.room || '-'}, ตู้: ${fields.cabinet}, ชั้น: ${fields.shelf})`);
+
         saveDataToLocalStorage();
         buildFiltersList();
         updateSummaryStats();
@@ -2177,6 +2693,12 @@
     }
 
     function confirmImportExcelData() {
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการนำเข้าข้อมูล (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        closeImportExcelModal();
+        return;
+      }
+
       if (!pendingImportData || !pendingImportData.rows || pendingImportData.rows.length === 0) {
         showToast('กรุณาเลือกไฟล์ Excel ก่อนนำเข้า', 'error');
         return;
@@ -2197,10 +2719,13 @@
         rawDataRows = [...rawDataRows, ...newRows];
       }
 
+      sortDatasetByMemberId(rawDataRows);
       detectColumnIndices(appHeaders);
       buildFiltersList();
       updateSummaryStats();
       saveDataToLocalStorage();
+
+      logAuditEvent('IMPORT', '-', '-', `นำเข้าข้อมูลจากไฟล์ Excel "${pendingImportData.fileName || ''}" (${newRows.length.toLocaleString('th-TH')} รายการ, รูปแบบ: ${importMode === 'replace' ? 'แทนที่ทั้งหมด' : 'เพิ่มต่อท้าย'})`);
 
       updateSyncStatusSuccess(`นำเข้าจากไฟล์ Excel เรียบร้อยแล้ว (${rawDataRows.length} รายการ)`, 'ไฟล์ Excel');
       showToast(`นำเข้าข้อมูลจาก Excel สำเร็จแล้ว! (${newRows.length} รายการ)`, 'success');
@@ -2306,12 +2831,721 @@
       }
     }
 
-    // Initial Load
+    // ==========================================
+    // CONFIRM EDIT POP-UP MODAL (ก่อนเปลี่ยนแปลงข้อมูล)
+    // ==========================================
+    let currentPendingEdit = null;
+
+    function openConfirmEditModal(editData) {
+      currentPendingEdit = editData;
+      const memIdEl = document.getElementById('confirmEditMemberId');
+      const memNameEl = document.getElementById('confirmEditMemberName');
+      if (memIdEl) memIdEl.innerText = editData.memberId || '-';
+      if (memNameEl) memNameEl.innerText = editData.fullName || 'ไม่ระบุชื่อ';
+
+      const diffContainer = document.getElementById('confirmEditDiffList');
+      if (diffContainer) {
+        diffContainer.innerHTML = editData.diffs.map(d => `
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
+            <span class="font-semibold text-slate-700 min-w-28 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-dot text-[9px] text-amber-500"></i> ${escapeHtml(d.label)}
+            </span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 line-through">
+                ${escapeHtml(d.oldVal || '(ว่าง)')}
+              </span>
+              <i class="fa-solid fa-arrow-right text-slate-400 text-xs"></i>
+              <span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                ${escapeHtml(d.newVal || '(ว่าง)')}
+              </span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('confirmEditModal').classList.remove('hidden');
+    }
+
+    function closeConfirmEditModal() {
+      currentPendingEdit = null;
+      document.getElementById('confirmEditModal').classList.add('hidden');
+    }
+
+    function executeConfirmEditSubmit() {
+      if (!currentPendingEdit) return;
+      const { editIndex, memberId, fullName, affiliation, room, cabinet, shelf, status, diffs } = currentPendingEdit;
+
+      if (!currentUser || currentUser.role === 'viewer') {
+        showToast('คุณไม่มีสิทธิ์ในการบันทึกหรือแก้ไขข้อมูล (สิทธิ์เข้าดูข้อมูลเท่านั้น)', 'error');
+        closeConfirmEditModal();
+        return;
+      }
+
+      const rowToSave = [...rawDataRows[editIndex]];
+      while (rowToSave.length < appHeaders.length) rowToSave.push('');
+
+      if (colIndexMap.memberId !== -1) rowToSave[colIndexMap.memberId] = memberId;
+      if (colIndexMap.name !== -1) rowToSave[colIndexMap.name] = fullName;
+      if (colIndexMap.affiliation !== -1) rowToSave[colIndexMap.affiliation] = affiliation;
+      if (colIndexMap.room !== -1) rowToSave[colIndexMap.room] = room;
+      if (colIndexMap.cabinet !== -1) rowToSave[colIndexMap.cabinet] = cabinet;
+      if (colIndexMap.shelf !== -1) rowToSave[colIndexMap.shelf] = shelf;
+      if (colIndexMap.status !== -1) rowToSave[colIndexMap.status] = status;
+
+      rawDataRows[editIndex] = rowToSave;
+      sortDatasetByMemberId(rawDataRows);
+
+      // Audit Log Event
+      const diffSummary = diffs.map(d => `${d.label}: '${d.oldVal || '-'}' ➔ '${d.newVal || '-'}'`).join(', ');
+      logAuditEvent('EDIT', memberId, fullName, `แก้ไขข้อมูล: ${diffSummary}`);
+
+      saveDataToLocalStorage();
+      buildFiltersList();
+      updateSummaryStats();
+      closeConfirmEditModal();
+      closeMemberFormModal();
+      executeSearch();
+      showToast(`บันทึกการแก้ไขข้อมูล "${fullName}" เรียบร้อยแล้ว`, 'success');
+    }
+
+    // ==========================================
+    // AUTHENTICATION & ACCESS CONTROL
+    // ==========================================
+    function initAuth() {
+      loadUsers();
+      try {
+        const session = localStorage.getItem(STORAGE_AUTH_SESSION_KEY);
+        if (session) {
+          const authData = JSON.parse(session);
+          // Verify user still exists in appUsers
+          const found = appUsers.find(u => u.username === authData.username);
+          if (found) {
+            currentUser = { ...found };
+            applyUserPermissions();
+            closeLoginModal();
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Session load error:', e);
+      }
+      openLoginModal();
+    }
+
+    function openLoginModal() {
+      const errBox = document.getElementById('loginErrorBox');
+      if (errBox) errBox.classList.add('hidden');
+      const modal = document.getElementById('loginModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      const modal = document.getElementById('loginModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash text-xs text-blue-600';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye text-xs text-slate-400';
+      }
+    }
+
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const rememberInput = document.getElementById('loginRemember');
+      const errorBox = document.getElementById('loginErrorBox');
+      const errorText = document.getElementById('loginErrorText');
+
+      const username = usernameInput ? usernameInput.value.trim().toLowerCase() : '';
+      const password = passwordInput ? passwordInput.value : '';
+
+      loadUsers();
+      const user = appUsers.find(u => u.username.toLowerCase() === username && u.password === password);
+
+      if (!user) {
+        if (errorBox) {
+          errorText.innerText = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง';
+          errorBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Check if user is forced to change password (first login)
+      if (user.mustChangePassword) {
+        pendingForceChangeUser = user;
+        closeLoginModal();
+        openForceChangePasswordModal(user);
+        return;
+      }
+
+      // Login success
+      currentUser = { ...user };
+      if (rememberInput && rememberInput.checked) {
+        try {
+          localStorage.setItem(STORAGE_AUTH_SESSION_KEY, JSON.stringify({
+            username: user.username,
+            role: user.role,
+            fullName: user.fullName
+          }));
+        } catch (e) {}
+      }
+
+      applyUserPermissions();
+      closeLoginModal();
+      showToast(`ยินดีต้อนรับคุณ ${user.fullName} (${user.role.toUpperCase()}) เข้าสู่ระบบ`, 'success');
+      logAuditEvent('LOGIN', '-', '-', `เข้าสู่ระบบสำเร็จ (สิทธิ์: ${user.role})`);
+    }
+
+    function logout() {
+      if (confirm('ต้องการออกจากระบบใช่หรือไม่?')) {
+        currentUser = null;
+        try {
+          localStorage.removeItem(STORAGE_AUTH_SESSION_KEY);
+        } catch (e) {}
+        openLoginModal();
+        showToast('ออกจากระบบเรียบร้อยแล้ว', 'info');
+      }
+    }
+
+    function openForceChangePasswordModal(user) {
+      pendingForceChangeUser = user;
+      const displayEl = document.getElementById('forceUserDisplay');
+      if (displayEl) displayEl.innerText = `${user.fullName} (@${user.username})`;
+      const errBox = document.getElementById('forceErrorBox');
+      if (errBox) errBox.classList.add('hidden');
+      const form = document.getElementById('forceChangePasswordForm');
+      if (form) form.reset();
+      const modal = document.getElementById('forceChangePasswordModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeForceChangePasswordModal() {
+      pendingForceChangeUser = null;
+      const modal = document.getElementById('forceChangePasswordModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function handleForceChangePasswordSubmit(event) {
+      event.preventDefault();
+      if (!pendingForceChangeUser) return;
+
+      const p1 = document.getElementById('forceNewPassword').value;
+      const p2 = document.getElementById('forceConfirmPassword').value;
+      const errBox = document.getElementById('forceErrorBox');
+      const errText = document.getElementById('forceErrorText');
+
+      if (!p1 || p1.length < 4) {
+        if (errBox) {
+          errText.innerText = 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (p1 !== p2) {
+        if (errBox) {
+          errText.innerText = 'รหัสผ่านที่ยืนยันไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง';
+          errBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Update user password in list
+      const uIdx = appUsers.findIndex(u => u.username === pendingForceChangeUser.username);
+      if (uIdx !== -1) {
+        appUsers[uIdx].password = p1;
+        appUsers[uIdx].mustChangePassword = false;
+        saveUsersToStorageAndRemote();
+        currentUser = { ...appUsers[uIdx] };
+
+        // Save session
+        try {
+          localStorage.setItem(STORAGE_AUTH_SESSION_KEY, JSON.stringify({
+            username: currentUser.username,
+            role: currentUser.role,
+            fullName: currentUser.fullName
+          }));
+        } catch (e) {}
+
+        logAuditEvent('PASSWORD_CHANGE', '-', '-', `ผู้ใช้งาน @${currentUser.username} เปลี่ยนรหัสผ่านใหม่ครั้งแรกสำเร็จ`);
+        closeForceChangePasswordModal();
+        applyUserPermissions();
+        showToast('เปลี่ยนรหัสผ่านใหม่สำเร็จและเข้าสู่ระบบเรียบร้อยแล้ว', 'success');
+      }
+    }
+
+    function applyUserPermissions() {
+      if (!currentUser) return;
+
+      // Update Header Profile Info
+      const nameEl = document.getElementById('headerUserDisplayName');
+      const roleBadgeEl = document.getElementById('headerUserRoleBadge');
+      const subtextEl = document.getElementById('headerUserSubtext');
+
+      if (nameEl) nameEl.innerText = currentUser.fullName || currentUser.username;
+      if (subtextEl) subtextEl.innerText = `@${currentUser.username}`;
+
+      if (roleBadgeEl) {
+        if (currentUser.role === 'admin') {
+          roleBadgeEl.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-amber-400 text-slate-900';
+          roleBadgeEl.innerText = 'Admin';
+        } else if (currentUser.role === 'editor') {
+          roleBadgeEl.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-sky-400 text-slate-900';
+          roleBadgeEl.innerText = 'Editor';
+        } else {
+          roleBadgeEl.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-slate-300 text-slate-800';
+          roleBadgeEl.innerText = 'Viewer';
+        }
+      }
+
+      // Hide or show Action Buttons based on Role
+      const btnAdd = document.getElementById('btnAddMember');
+      const btnImport = document.getElementById('btnImportExcel');
+      const btnUserMgmt = document.getElementById('btnUserManagement');
+      const btnConfig = document.getElementById('btnConfigModal');
+
+      // Admin has full access
+      if (currentUser.role === 'admin') {
+        if (btnAdd) btnAdd.classList.remove('hidden');
+        if (btnImport) btnImport.classList.remove('hidden');
+        if (btnUserMgmt) btnUserMgmt.classList.remove('hidden');
+        if (btnConfig) btnConfig.classList.remove('hidden');
+      } else if (currentUser.role === 'editor') {
+        if (btnAdd) btnAdd.classList.remove('hidden');
+        if (btnImport) btnImport.classList.remove('hidden');
+        if (btnUserMgmt) btnUserMgmt.classList.add('hidden');
+        if (btnConfig) btnConfig.classList.add('hidden');
+      } else {
+        // Viewer: Read-only
+        if (btnAdd) btnAdd.classList.add('hidden');
+        if (btnImport) btnImport.classList.add('hidden');
+        if (btnUserMgmt) btnUserMgmt.classList.add('hidden');
+        if (btnConfig) btnConfig.classList.add('hidden');
+      }
+
+      // Re-render current page to update buttons inside table
+      renderTablePage();
+    }
+
+    // ==========================================
+    // USER MANAGEMENT (สำหรับแอดมิน)
+    // ==========================================
+    function loadUsers() {
+      try {
+        const stored = localStorage.getItem(STORAGE_USERS_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            appUsers = parsed;
+            return;
+          }
+        }
+      } catch (e) {}
+      appUsers = JSON.parse(JSON.stringify(DEFAULT_USERS));
+      localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(appUsers));
+    }
+
+    async function fetchUsersFromFirebase() {
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseUsersEndpoint(firebaseUrl);
+      try {
+        const res = await fetch(endpoint, { cache: 'no-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data) && data.length > 0) {
+            appUsers = data;
+            localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(appUsers));
+          } else {
+            // Seed Firebase with current users
+            syncUsersToFirebase();
+          }
+        }
+      } catch (e) {
+        console.warn('Cannot fetch users from Firebase:', e);
+      }
+    }
+
+    async function syncUsersToFirebase() {
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseUsersEndpoint(firebaseUrl);
+      try {
+        await fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(appUsers)
+        });
+      } catch (e) {
+        console.warn('Cannot sync users to Firebase:', e);
+      }
+    }
+
+    function saveUsersToStorageAndRemote(syncRemote = true) {
+      try {
+        localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(appUsers));
+      } catch (e) {}
+      if (syncRemote) {
+        syncUsersToFirebase();
+      }
+    }
+
+    function openUserManagementModal() {
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถเข้าถึงการจัดการผู้ใช้งานได้', 'error');
+        return;
+      }
+      loadUsers();
+      renderUsersTable();
+      document.getElementById('userManagementModal').classList.remove('hidden');
+    }
+
+    function closeUserManagementModal() {
+      document.getElementById('userManagementModal').classList.add('hidden');
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('usersTableBody');
+      const countEl = document.getElementById('userCountText');
+      if (countEl) countEl.innerText = appUsers.length;
+      if (!tbody) return;
+
+      tbody.innerHTML = appUsers.map(u => {
+        let roleBadge = '';
+        if (u.role === 'admin') {
+          roleBadge = '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 border border-purple-200">👑 Admin</span>';
+        } else if (u.role === 'editor') {
+          roleBadge = '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200">✍️ Editor</span>';
+        } else {
+          roleBadge = '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">👁️ Viewer</span>';
+        }
+
+        const pwdStatus = u.mustChangePassword
+          ? '<span class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-300"><i class="fa-solid fa-triangle-exclamation"></i> ต้องเปลี่ยนรหัส</span>'
+          : '<span class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-check"></i> พร้อมใช้งาน</span>';
+
+        const isProtected = u.username === 'admin' || (currentUser && u.username === currentUser.username);
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="p-3 font-mono font-bold text-slate-800">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-user-circle text-slate-400 text-sm"></i>
+                <span>${escapeHtml(u.username)}</span>
+              </div>
+            </td>
+            <td class="p-3 text-slate-700 font-medium">${escapeHtml(u.fullName || '-')}</td>
+            <td class="p-3 text-center">${roleBadge}</td>
+            <td class="p-3 text-center">${pwdStatus}</td>
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="promptResetUserPassword('${escapeHtml(u.username)}')" title="รีเซ็ตรหัสผ่านและบังคับเปลี่ยนรหัสผ่าน"
+                  class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-200 text-xs transition cursor-pointer flex items-center gap-1">
+                  <i class="fa-solid fa-key"></i> <span class="hidden sm:inline">รีเซ็ต</span>
+                </button>
+                ${!isProtected ? `
+                <button onclick="deleteUser('${escapeHtml(u.username)}')" title="ลบผู้ใช้งานนี้"
+                  class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg border border-rose-200 text-xs transition cursor-pointer flex items-center gap-1">
+                  <i class="fa-solid fa-trash-can"></i> <span class="hidden sm:inline">ลบ</span>
+                </button>
+                ` : `
+                <span class="text-[10px] text-slate-400 italic px-1">หลัก</span>
+                `}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleAddNewUserSubmit(event) {
+      event.preventDefault();
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเพิ่มผู้ใช้ได้', 'error');
+        return;
+      }
+
+      const username = document.getElementById('newUsername').value.trim().toLowerCase();
+      const fullName = document.getElementById('newFullName').value.trim();
+      const role = document.getElementById('newRole').value;
+      const password = document.getElementById('newPassword').value.trim();
+      const mustChange = document.getElementById('newMustChangePassword').checked;
+
+      if (!username || !fullName || !password) {
+        showToast('กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error');
+        return;
+      }
+
+      if (appUsers.some(u => u.username.toLowerCase() === username)) {
+        showToast(`ชื่อผู้ใช้ "${username}" มีอยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น`, 'error');
+        return;
+      }
+
+      const newUser = {
+        username,
+        fullName,
+        role,
+        password,
+        mustChangePassword: mustChange,
+        createdAt: new Date().toISOString()
+      };
+
+      appUsers.push(newUser);
+      saveUsersToStorageAndRemote();
+      logAuditEvent('ADD_USER', '-', fullName, `สร้างผู้ใช้งานใหม่ @${username} (สิทธิ์: ${role}, บังคับเปลี่ยนรหัส: ${mustChange ? 'ใช่' : 'ไม่ใช่'})`);
+
+      document.getElementById('addNewUserForm').reset();
+      renderUsersTable();
+      showToast(`เพิ่มผู้ใช้งาน "${fullName}" (@${username}) สำเร็จแล้ว`, 'success');
+    }
+
+    function promptResetUserPassword(targetUsername) {
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถรีเซ็ตรหัสผ่านได้', 'error');
+        return;
+      }
+
+      const u = appUsers.find(user => user.username === targetUsername);
+      if (!u) return;
+
+      const newPass = prompt(`ระบุรหัสผ่านชั่วคราวใหม่สำหรับผู้ใช้ "${u.fullName}" (@${u.username}):`, '1234');
+      if (newPass === null) return;
+      if (!newPass.trim()) {
+        showToast('รหัสผ่านต้องไม่ว่างเปล่า', 'error');
+        return;
+      }
+
+      u.password = newPass.trim();
+      u.mustChangePassword = true; // บังคับให้เปลี่ยนรหัสผ่านเมื่อเข้าใช้งาน
+      saveUsersToStorageAndRemote();
+      logAuditEvent('RESET_PASSWORD', '-', u.fullName, `รีเซ็ตรหัสผ่านชั่วคราวให้ผู้ใช้ @${u.username} และบังคับเปลี่ยนรหัสผ่านเมื่อเข้าสู่ระบบ`);
+      renderUsersTable();
+      showToast(`รีเซ็ตรหัสผ่านของผู้ใช้ @${u.username} แล้ว (ระบบจะบังคับให้เปลี่ยนรหัสผ่านเมื่อเข้าใช้งาน)`, 'success');
+    }
+
+    function deleteUser(targetUsername) {
+      if (!currentUser || currentUser.role !== 'admin') {
+        showToast('เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถลบผู้ใช้ได้', 'error');
+        return;
+      }
+
+      if (targetUsername === 'admin' || (currentUser && targetUsername === currentUser.username)) {
+        showToast('ไม่สามารถลบบัญชีหลักนี้ได้', 'error');
+        return;
+      }
+
+      const u = appUsers.find(user => user.username === targetUsername);
+      if (!u) return;
+
+      if (!confirm(`ยืนยันการลบผู้ใช้งาน "${u.fullName}" (@${u.username}) ออกจากระบบหรือไม่?`)) {
+        return;
+      }
+
+      appUsers = appUsers.filter(user => user.username !== targetUsername);
+      saveUsersToStorageAndRemote();
+      logAuditEvent('DELETE_USER', '-', u.fullName, `ลบผู้ใช้งาน @${targetUsername} ออกจากระบบ`);
+      renderUsersTable();
+      showToast(`ลบผู้ใช้งาน @${targetUsername} เรียบร้อยแล้ว`, 'info');
+    }
+
+    // ==========================================
+    // AUDIT LOG SYSTEM (สืบค้นประวัติย้อนหลัง)
+    // ==========================================
+    function loadAuditLogs() {
+      try {
+        const stored = localStorage.getItem(STORAGE_AUDIT_LOGS_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            auditLogs = parsed;
+            return;
+          }
+        }
+      } catch (e) {}
+      auditLogs = [];
+    }
+
+    async function fetchAuditLogsFromFirebase() {
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseAuditEndpoint(firebaseUrl);
+      try {
+        const res = await fetch(endpoint, { cache: 'no-cache' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data) && data.length > 0) {
+            auditLogs = data;
+            localStorage.setItem(STORAGE_AUDIT_LOGS_KEY, JSON.stringify(auditLogs));
+          } else if (auditLogs.length > 0) {
+            syncAuditLogsToFirebase();
+          }
+        }
+      } catch (e) {
+        console.warn('Cannot fetch audit logs from Firebase:', e);
+      }
+    }
+
+    async function syncAuditLogsToFirebase() {
+      const firebaseUrl = localStorage.getItem(STORAGE_FIREBASE_URL_KEY) || DEFAULT_FIREBASE_URL;
+      const endpoint = getFirebaseAuditEndpoint(firebaseUrl);
+      try {
+        await fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(auditLogs.slice(0, 500))
+        });
+      } catch (e) {
+        console.warn('Cannot sync audit logs to Firebase:', e);
+      }
+    }
+
+    function logAuditEvent(action, memberId, memberName, details) {
+      const logEntry = {
+        id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        timestamp: new Date().toISOString(),
+        username: currentUser ? currentUser.username : 'system',
+        userFullName: currentUser ? (currentUser.fullName || currentUser.username) : 'ระบบ',
+        role: currentUser ? currentUser.role : 'system',
+        action,
+        memberId: memberId || '-',
+        memberName: memberName || '-',
+        details: details || '-'
+      };
+
+      auditLogs.unshift(logEntry);
+      if (auditLogs.length > 500) {
+        auditLogs = auditLogs.slice(0, 500);
+      }
+
+      try {
+        localStorage.setItem(STORAGE_AUDIT_LOGS_KEY, JSON.stringify(auditLogs));
+      } catch (e) {}
+
+      // Asynchronous sync
+      syncAuditLogsToFirebase();
+    }
+
+    function openAuditLogModal(filterMemberId = '') {
+      loadAuditLogs();
+      const sInput = document.getElementById('auditSearchInput');
+      if (sInput) sInput.value = filterMemberId;
+      const actSelect = document.getElementById('auditActionSelect');
+      if (actSelect) actSelect.value = '';
+      renderAuditLogTable();
+      document.getElementById('auditLogModal').classList.remove('hidden');
+    }
+
+    function closeAuditLogModal() {
+      document.getElementById('auditLogModal').classList.add('hidden');
+    }
+
+    function clearAuditFilter() {
+      const sInput = document.getElementById('auditSearchInput');
+      if (sInput) sInput.value = '';
+      const actSelect = document.getElementById('auditActionSelect');
+      if (actSelect) actSelect.value = '';
+      renderAuditLogTable();
+    }
+
+    function openAuditForCurrentMember() {
+      if (!currentSelectedMemberRow) return;
+      const fields = getSearchableFields(currentSelectedMemberRow);
+      openAuditLogModal(fields.memberId);
+    }
+
+    function renderAuditLogTable() {
+      const sInput = document.getElementById('auditSearchInput');
+      const actSelect = document.getElementById('auditActionSelect');
+      const query = sInput ? sInput.value.trim().toLowerCase() : '';
+      const actFilter = actSelect ? actSelect.value : '';
+
+      const filtered = auditLogs.filter(log => {
+        if (actFilter && log.action !== actFilter) return false;
+        if (!query) return true;
+        const text = `${log.memberId} ${log.memberName} ${log.username} ${log.userFullName} ${log.details}`.toLowerCase();
+        return text.includes(query);
+      });
+
+      const countBadge = document.getElementById('auditCountBadge');
+      if (countBadge) countBadge.innerText = `${filtered.length.toLocaleString('th-TH')} รายการ`;
+
+      const tbody = document.getElementById('auditTableBody');
+      if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="p-8 text-center text-slate-400">
+              <i class="fa-solid fa-clock-rotate-left text-2xl mb-2 block"></i>
+              ไม่พบประวัติการเปลี่ยนแปลงที่ตรงตามเงื่อนไข
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(log => {
+        let actionBadge = '';
+        if (log.action === 'ADD') {
+          actionBadge = '<span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700 text-[10px] border border-emerald-200">🟢 เพิ่มสมาชิก</span>';
+        } else if (log.action === 'EDIT') {
+          actionBadge = '<span class="px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-700 text-[10px] border border-amber-200">🟠 แก้ไขข้อมูล</span>';
+        } else if (log.action === 'STATUS_CHANGE') {
+          actionBadge = '<span class="px-2 py-0.5 rounded-full font-bold bg-purple-100 text-purple-700 text-[10px] border border-purple-200">🟣 เปลี่ยนสถานะ</span>';
+        } else if (log.action === 'DELETE') {
+          actionBadge = '<span class="px-2 py-0.5 rounded-full font-bold bg-rose-100 text-rose-700 text-[10px] border border-rose-200">🔴 ลบข้อมูล</span>';
+        } else if (log.action === 'IMPORT') {
+          actionBadge = '<span class="px-2 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700 text-[10px] border border-blue-200">🔵 นำเข้า Excel</span>';
+        } else {
+          actionBadge = `<span class="px-2 py-0.5 rounded-full font-bold bg-slate-100 text-slate-700 text-[10px] border border-slate-200">${escapeHtml(log.action)}</span>`;
+        }
+
+        const dateObj = new Date(log.timestamp);
+        const timeFormatted = isNaN(dateObj.getTime()) ? log.timestamp :
+          `${dateObj.toLocaleDateString('th-TH')} ${dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} น.`;
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3 text-slate-500 whitespace-nowrap text-[11px]">
+              <i class="fa-regular fa-clock text-slate-400 mr-1"></i>${timeFormatted}
+            </td>
+            <td class="p-3 text-slate-700 font-medium">
+              <div>${escapeHtml(log.userFullName || log.username)}</div>
+              <div class="text-[10px] text-slate-400 font-mono">@${escapeHtml(log.username)}</div>
+            </td>
+            <td class="p-3 text-center whitespace-nowrap">${actionBadge}</td>
+            <td class="p-3">
+              ${log.memberId && log.memberId !== '-' ? `
+                <div class="font-mono font-bold text-blue-700">${escapeHtml(log.memberId)}</div>
+                <div class="text-slate-800 text-xs">${escapeHtml(log.memberName)}</div>
+              ` : '<span class="text-slate-400">-</span>'}
+            </td>
+            <td class="p-3 text-slate-700 leading-relaxed font-mono text-[11px] max-w-xs sm:max-w-md break-words">
+              ${escapeHtml(log.details)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // INITIAL LOAD
+    // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
       // Clean legacy cache that may contain sample dummy data
       try {
         localStorage.removeItem('stn_coop_member_cache_data_v1');
       } catch (e) {}
+
+      // Initialize Users & Audit Logs
+      loadUsers();
+      loadAuditLogs();
 
       // Check cache first for instant UX
       try {
@@ -2322,6 +3556,7 @@
             const norm = normalizeMemberDataset(parsedCache.headers || [...DEFAULT_HEADERS], parsedCache.rows || []);
             appHeaders = norm.headers;
             rawDataRows = norm.rows;
+            sortDatasetByMemberId(rawDataRows);
             detectColumnIndices(appHeaders);
             buildFiltersList();
             updateSummaryStats();
@@ -2330,6 +3565,9 @@
           }
         }
       } catch (e) {}
+
+      // Authenticate Session (Enforces Login Modal if not logged in)
+      initAuth();
 
       // Fetch live data from configured database
       fetchDatabaseData();
